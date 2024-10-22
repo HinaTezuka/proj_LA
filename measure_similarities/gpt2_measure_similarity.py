@@ -1,6 +1,5 @@
 """
 memo:
-・　(llama3を使う場合は）hugging faceにログイン: !huggingface-cli login --token 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
 ・GPT-2-smallを対象に調査
 ・google colabですでに同じ検証をしている: https://colab.research.google.com/drive/1h_wSGMWQRtcdFM88tgZdc3qLQjtDSN1u#scrollTo=8TbA3b1uqPeW
 """

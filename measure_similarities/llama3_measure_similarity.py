@@ -1,12 +1,21 @@
+"""
+memo:
+・　(llama3を使う場合は）hugging faceにログイン: !huggingface-cli login --token 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
+・llama3(8B)を対象に調査
+・google colabですでに同じ検証をしている: https://colab.research.google.com/drive/1h_wSGMWQRtcdFM88tgZdc3qLQjtDSN1u#scrollTo=8TbA3b1uqPeW
+"""
+
+
 from similarity_funcs import *
 
 import torch
 import transformers
-import matplotlib.pyplot as plt
 
 from collections import defaultdict
 from transformers import AutoModel, AutoTokenizer
 # print('______module successfully loaded______')
+
+""" モデル指定・ロード """
 
 # モデル指定
 llama_model_original_name = "meta-llama/Meta-Llama-3-8B" # en
@@ -14,7 +23,7 @@ llama_model_ja_name = "lightblue/suzume-llama-3-8B-japanese" # ja
 llama_model_ger_name = "DiscoResearch/Llama3-DiscoLeo-Instruct-8B-v0.1" # ger
 llama_model_ita_name = "DeepMount00/Llama-3-8b-Ita" # ita
 # llama_model_ko_name = ""
-llama_model_chi_name = "shareAI/llama3-Chinese-chat-8b"
+llama_model_chi_name = "shareAI/llama3-Chinese-chat-8b" # chi
 
 # モデルのロード
 llama_model_original = AutoModel.from_pretrained(llama_model_original_name)
@@ -22,6 +31,8 @@ llama_model_ja = AutoModel.from_pretrained(llama_model_ja_name)
 llama_model_ger = AutoModel.from_pretrained(llama_model_ger_name)
 llama_model_ita = AutoModel.from_pretrained(llama_model_ita_name)
 llama_model_chi = AutoModel.from_pretrained(llama_model_chi_name)
+
+""" それぞれのモデルのparametersを取得 """
 
 # 重みを取得
 state_dict_llama_original = llama_model_original.state_dict() # original(english)
