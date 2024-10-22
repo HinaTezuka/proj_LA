@@ -4,6 +4,28 @@ import torch
 from collections import defaultdict
 from torch import nn
 
+""" その他のfuncs """
+
+"""
+gpt2モデルのいくつかのstate_dictでは"transformer."という接頭辞がついているものとついていないものが混在しているため、各keyの名前を合わせるために削除するfunc
+"""
+def delete_transformer_prefixes_from_state_dict_keys(state_dict):
+  state_dict = {
+      key.replace('transformer.', ''): value for key, value in state_dict.items()
+  }
+  return state_dict
+
+"""
+modelごとにテンソルのサイズが違うlayerがあるかを確認するfunc
+"""
+def is_different_in_terms_of_dim_size_of_each_layer(m1_dict, m2_dict):
+  for layer_name in m1_dict.keys():
+    if layer_name in m2_dict:
+        size_m1 = m1_dict[layer_name].shape
+        size_m2 = m2_dict[layer_name].shape
+        if size_m1 != size_m2:
+            print(f"Layer {layer_name} has different sizes: {size_m1} vs {size_m2}")
+
 
 """ 類似度などを計算するfuncs """
 
