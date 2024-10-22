@@ -9,10 +9,10 @@ from transformers import AutoModel, AutoTokenizer
 # print('______module successfully loaded______')
 
 # モデル指定
-llama_model_original_name = "meta-llama/Meta-Llama-3-8B"
-llama_model_ja_name = "lightblue/suzume-llama-3-8B-japanese"
-llama_model_ger_name = "DiscoResearch/Llama3-DiscoLeo-Instruct-8B-v0.1"
-llama_model_ita_name = "DeepMount00/Llama-3-8b-Ita"
+llama_model_original_name = "meta-llama/Meta-Llama-3-8B" # en
+llama_model_ja_name = "lightblue/suzume-llama-3-8B-japanese" # ja
+llama_model_ger_name = "DiscoResearch/Llama3-DiscoLeo-Instruct-8B-v0.1" # ger
+llama_model_ita_name = "DeepMount00/Llama-3-8b-Ita" # ita
 # llama_model_ko_name = ""
 llama_model_chi_name = "shareAI/llama3-Chinese-chat-8b"
 
