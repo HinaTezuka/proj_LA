@@ -23,14 +23,14 @@ llama_model_ja_name = "lightblue/suzume-llama-3-8B-japanese" # ja
 llama_model_ger_name = "DiscoResearch/Llama3-DiscoLeo-Instruct-8B-v0.1" # ger
 llama_model_ita_name = "DeepMount00/Llama-3-8b-Ita" # ita
 # llama_model_ko_name = ""
-llama_model_chi_name = "shareAI/llama3-Chinese-chat-8b" # chi
+# llama_model_chi_name = "shareAI/llama3-Chinese-chat-8b" # chi : <- OSError: shareAI/llama3-Chinese-chat-8b does not appear to have a file named config.json. Checkout 'https://huggingface.co/shareAI/llama3-Chinese-chat-8b/tree/main' for available files.
 
 # モデルのロード
 llama_model_original = AutoModel.from_pretrained(llama_model_original_name)
 llama_model_ja = AutoModel.from_pretrained(llama_model_ja_name)
 llama_model_ger = AutoModel.from_pretrained(llama_model_ger_name)
 llama_model_ita = AutoModel.from_pretrained(llama_model_ita_name)
-llama_model_chi = AutoModel.from_pretrained(llama_model_chi_name)
+# llama_model_chi = AutoModel.from_pretrained(llama_model_chi_name)
 
 """ それぞれのモデルのparametersを取得 """
 
@@ -39,7 +39,7 @@ state_dict_llama_original = llama_model_original.state_dict() # original(english
 state_dict_llama_ja = llama_model_ja.state_dict() # japanese
 state_dict_llama_ger = llama_model_ger.state_dict() # german
 state_dict_llama_ita = llama_model_ita.state_dict() # italian
-state_dict_llama_chi = llama_model_chi.state_dict() # chinese
+# state_dict_llama_chi = llama_model_chi.state_dict() # chinese
 
 # 重みの比較結果を保存する辞書
 weight_changes_llama = {} # 全体の結果の保存先
@@ -54,10 +54,10 @@ weight_changes_llama_en_chi = defaultdict(dict)
 weight_changes_llama_en_ja_computed = compare_between_models(weight_changes_llama_en_ja, state_dict_llama_original, state_dict_llama_ja) # en_ja
 weight_changes_llama_en_ger_computed = compare_between_models(weight_changes_llama_en_ger, state_dict_llama_original, state_dict_llama_ger) # en_ger
 weight_changes_llama_en_ita_computed = compare_between_models(weight_changes_llama_en_ita, state_dict_llama_original, state_dict_llama_ita) # en_ita
-weight_changes_llama_en_chi_computed = compare_between_models(weight_changes_llama_en_chi, state_dict_llama_original, state_dict_llama_chi) # en_chi
+# weight_changes_llama_en_chi_computed = compare_between_models(weight_changes_llama_en_chi, state_dict_llama_original, state_dict_llama_chi) # en_chi
 
 # 辞書に結果を格納
 weight_changes_llama['en_ja'] = weight_changes_llama_en_ja_computed
 weight_changes_llama['en_ger'] = weight_changes_llama_en_ger_computed
 weight_changes_llama['en_ita'] = weight_changes_llama_en_ita_computed
-weight_changes_llama['en_chi'] = weight_changes_llama_en_chi_computed
+# weight_changes_llama['en_chi'] = weight_changes_llama_en_chi_computed
