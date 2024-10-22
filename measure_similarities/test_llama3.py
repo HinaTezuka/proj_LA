@@ -1,4 +1,4 @@
-# pro
+""" prototype experiment for GPU-node """
 
 from llama3_measure_similarity import *
 

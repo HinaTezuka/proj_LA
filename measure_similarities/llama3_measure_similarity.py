@@ -20,6 +20,7 @@ from transformers import AutoModel, AutoTokenizer
 # モデル指定
 llama_model_original_name = "meta-llama/Meta-Llama-3-8B" # en
 llama_model_ja_name = "lightblue/suzume-llama-3-8B-japanese" # ja
+# llama_model_ja_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1" # ja
 llama_model_ger_name = "DiscoResearch/Llama3-DiscoLeo-Instruct-8B-v0.1" # ger
 llama_model_ita_name = "DeepMount00/Llama-3-8b-Ita" # ita
 # llama_model_ko_name = ""
