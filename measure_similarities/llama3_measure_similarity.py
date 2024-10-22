@@ -50,10 +50,21 @@ weight_changes_llama_en_ger = defaultdict(dict)
 weight_changes_llama_en_ita = defaultdict(dict)
 weight_changes_llama_en_chi = defaultdict(dict)
 
+""" 類似度などを計算 """
+""" 英語->日本語 """
 # 類似度などを計算
 weight_changes_llama_en_ja_computed = compare_between_models(weight_changes_llama_en_ja, state_dict_llama_original, state_dict_llama_ja) # en_ja
-weight_changes_llama_en_ger_computed = compare_between_models(weight_changes_llama_en_ger, state_dict_llama_original, state_dict_llama_ger) # en_ger
+# 辞書に結果を格納
+weight_changes_llama['en_ja'] = weight_changes_llama_en_ja_computed
+""" 英語->ドイツ語 """
+weight_changes_llama_en_ger_computed = compare_between_models(weight_changes_llama_en_ger, state_dict_llama_original, state_dict_llama_ger) # en_du
+weight_changes_llama['en_ger'] = weight_changes_llama_en_ger_computed
+""" 英語->イタリア語 """
 weight_changes_llama_en_ita_computed = compare_between_models(weight_changes_llama_en_ita, state_dict_llama_original, state_dict_llama_ita) # en_ita
+weight_changes_llama['en_ita'] = weight_changes_llama_en_ita_computed
+# weight_changes_llama_en_ja_computed = compare_between_models(weight_changes_llama_en_ja, state_dict_llama_original, state_dict_llama_ja) # en_ja
+# weight_changes_llama_en_ger_computed = compare_between_models(weight_changes_llama_en_ger, state_dict_llama_original, state_dict_llama_ger) # en_ger
+# weight_changes_llama_en_ita_computed = compare_between_models(weight_changes_llama_en_ita, state_dict_llama_original, state_dict_llama_ita) # en_ita
 # weight_changes_llama_en_chi_computed = compare_between_models(weight_changes_llama_en_chi, state_dict_llama_original, state_dict_llama_chi) # en_chi
 
 # 辞書に結果を格納
