@@ -1,4 +1,4 @@
-# prototype test
+# pro
 
 from llama3_measure_similarity import *
 
@@ -92,8 +92,10 @@ plt.ylim(0, 1)  # コサイン類似度は0から1の範囲
 plt.grid(axis='y')
 
 plt.tight_layout()  # レイアウトを調整
-plt.show()
-
+# plt.show()
+# グラフをファイルに保存 (PNG形式)
+plt.savefig("/home/s2410121/proj_LA/measure_similarities/barplot.png")
+plt.close()
 
 """ layerごとの絶対差の変遷のplot """
 
@@ -125,4 +127,7 @@ plt.title('Mean Absolute Differences Across Models')
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.show()
+# plt.show()
+# グラフをファイルに保存 (PNG形式)
+plt.savefig("/home/s2410121/proj_LA/measure_similarities/lineplot.png")
+plt.close()
