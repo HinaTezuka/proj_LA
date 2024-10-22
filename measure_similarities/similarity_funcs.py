@@ -78,8 +78,38 @@ def compare_between_models(weight_changes: defaultdict(dict), m1_dict: dict, m2_
       weight_changes[layer_name]['cos_sim'] = cos_sim_value
     else:
       continue
+
   return weight_changes
 
+"""
+上のcompare_between_models関数のtest用ver.
+ループ数を大幅に削減(最初の num_layers_to_test層だけを比較).
+num_layers_to_test <- この引数でループ数を自由に設定可（デフォは３）.
+"""
+def compare_between_models_test(weight_changes: defaultdict(dict), m1_dict: dict, m2_dict: dict, num_layers_to_test: int = 3) -> defaultdict(dict):
+    # ループの回数を減らすために、最初の num_layers_to_test層だけを比較
+    for i, layer_name in enumerate(m1_dict.keys()):
+        if i >= num_layers_to_test:  # 指定した層数を超えたらループを終了
+            break
+        """
+        check(if):
+        1. layer_nameがもう一方のmodel(m2)のstate_dict.keys()にもあるか（keyの名前がちゃんと一致しているか。してなければスキップ）
+        2. 比較対象のlayerのparametersのshapeが一致しているか（していない場合は、align_tensor_sizes()でトリミングし、小さい方のテンソルにサイズを合わせる)
+        """
+        if layer_name in m2_dict:
+            if m1_dict[layer_name].shape != m2_dict[layer_name].shape:
+                m1_dict[layer_name], m2_dict[layer_name] = align_tensor_sizes(m1_dict[layer_name], m2_dict[layer_name])
+            # 2つの(modelの)parametersの差を計算(絶対値の差の平均)
+            weight_mean_abs_diff = mean_abs_diff(m1_dict[layer_name], m2_dict[layer_name])
+            # cosine類似度を計算
+            cos_sim_value = cos_sim(m1_dict[layer_name], m2_dict[layer_name])
+            # 結果をweight_changesに格納
+            weight_changes[layer_name]['mean_absolute_difference'] = weight_mean_abs_diff
+            weight_changes[layer_name]['cos_sim'] = cos_sim_value
+        else:
+            continue
+
+    return weight_changes
 
 """ weight_changesのイメージ(weight_changes_gpt2を例に):
 {
