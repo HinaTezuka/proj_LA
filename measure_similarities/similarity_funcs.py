@@ -42,7 +42,9 @@ def cos_sim(tensor1: torch.Tensor, tensor2: torch.Tensor) -> float:
 差の絶対値
 """
 def mean_abs_diff(v1, v2):
-  return torch.abs(torch.tensor(v1) - torch.tensor(v2)).mean().item()
+    if not isinstance(v1, torch.Tensor) or not isinstance(v2, torch.Tensor):
+        raise ValueError('Inputs must be torch.Tensors')
+    return torch.abs(v1 - v2).mean().item()
 
 """
 align_tensor_sizes(tensor1: torch.Tensor, tensor2: torch.Tensor):
