@@ -34,7 +34,7 @@ L2_iso_code = 'it'
 texts_en, texts_L2 = mutual_knn_acc_funcs.get_texts_from_translation_corpus(100, "gem", "en_ger")
 # culclate mutual_knn_acc
 mutual_knn_acc = mutual_knn_acc_funcs.compute_mutual_knn_acc(model_base, model_L2, tokenizer_base, tokenizer_L2, texts_en, texts_L2, 20)
-print(f"Mutual KNN Accuracy: {mutual_knn_accuracy}")
+print(f"Mutual KNN Accuracy: {mutual_knn_acc}")
 
 # Load Tatoeba dataset
 # dataset = load_dataset("tatoeba", lang1="en", lang2="du", split="train")  # Replace "L2" with the actual second language
@@ -59,4 +59,4 @@ print(f"Mutual KNN Accuracy: {mutual_knn_accuracy}")
 # print(f"Mutual KNN Accuracy: {mutual_knn_accuracy}")
 
 with open("knn_acc_ko.txt", "w") as f:
-    f.write(f"Mutual KNN Accuracy: {mutual_knn_accuracy}\n")
+    f.write(f"Mutual KNN Accuracy: {mutual_knn_acc}\n")
