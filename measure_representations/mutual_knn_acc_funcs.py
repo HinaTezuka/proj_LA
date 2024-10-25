@@ -1,5 +1,5 @@
 """
-some funcs copied from https://github.com/minyoungg/platonic-rep/blob/main/metrics.py
+some funcs were copied from https://github.com/minyoungg/platonic-rep/blob/main/metrics.py
 The Platonic Representation Hypothesis:https://arxiv.org/abs/2405.07987
 """
 
