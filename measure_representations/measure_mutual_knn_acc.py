@@ -58,5 +58,5 @@ print(f"Mutual KNN Accuracy: {mutual_knn_accuracy}")
 
 # print(f"Mutual KNN Accuracy: {mutual_knn_accuracy}")
 
-# with open("knn_acc_ko.txt", "w") as f:
-#     f.write(f"Mutual KNN Accuracy: {mutual_knn_accuracy}\n")
+with open("knn_acc_ko.txt", "w") as f:
+    f.write(f"Mutual KNN Accuracy: {mutual_knn_accuracy}\n")
