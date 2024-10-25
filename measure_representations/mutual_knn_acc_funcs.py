@@ -1,12 +1,13 @@
 """
-copied from https://github.com/minyoungg/platonic-rep/blob/main/metrics.py
+some funcs copied from https://github.com/minyoungg/platonic-rep/blob/main/metrics.py
 The Platonic Representation Hypothesis:https://arxiv.org/abs/2405.07987
 """
 
+from datasets import load_dataset
 import torch
 
 # Extract features from the models (example for embedding layer or first hidden layer)
-def extract_representations(model, tokenizer, texts, layer_idx=0): # layer_indexで「どの層」のrepresentationsをとるかを指定
+def extract_representations(model, tokenizer, texts, layer_idx=-1): # layer_indexで「どの層」のrepresentationsをとるかを指定
     tokens = tokenizer(texts, padding=True, truncation=True, return_tensors="pt")
     with torch.no_grad():
         outputs = model(**tokens)
@@ -59,3 +60,34 @@ def compute_nearest_neighbors(feats, topk=1):
         (feats @ feats.T).fill_diagonal_(-1e8).argsort(dim=1, descending=True)[:, :topk]
     )
     return knn
+
+# datasetからen, L2の対訳textを取得
+def get_texts_from_translation_corpus(n_samples, L2_iso_code, dataset="tatoeba") -> (list, list):
+    if dataset == "tatoeba":
+        dataset = load_dataset(dataset, lang1="en", lang2=L2_iso_code, split="train")
+    elif dataset == "en_ger":
+        dataset = load_dataset("KarthikSaran/trans_en_ger", split="train")
+    else:
+        print("dataset is not defined!")
+    print(dataset[0])
+    texts_en = [sample['translation']['en'] for sample in dataset.select(range(n_samples))]
+    texts_L2 = [sample['translation'][L2_iso_code] for sample in dataset.select(range(n_samples))]
+
+    return texts_en, texts_L2
+
+# mutual_knn_accuracyを算出
+def compute_mutual_knn_acc(
+    model_base,
+    model_L2,
+    model_base_tokenizer,
+    model_L2_tokenizer,
+    texts_en,
+    texts_L2,
+    topk
+    ):
+    # representationsを抽出
+    feats_base = extract_representations(model_base, model_base_tokenizer, texts_en)
+    feats_L2 = extract_representations(model_L2, model_L2_tokenizer, texts_L2)
+    mutual_knn_accuracy = mutual_knn(feats_base, feats_L2, topk)
+
+    return mutual_knn_accuracy
