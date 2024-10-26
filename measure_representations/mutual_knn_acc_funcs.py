@@ -62,7 +62,7 @@ def compute_nearest_neighbors(feats, topk=1):
     return knn
 
 # datasetからen, L2の対訳textを取得
-def get_texts_from_translation_corpus(n_samples, L2_iso_code, dataset="tatoeba") -> (list, list):
+def get_texts_from_translation_corpus(n_samples, L2_iso_code, dataset="tatoeba"):
     if dataset == "tatoeba":
         dataset = load_dataset(dataset, lang1="en", lang2=L2_iso_code, split="train")
     elif dataset == "en_ger":
