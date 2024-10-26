@@ -1,5 +1,9 @@
 """ gpt2-smallの類似度・差異計算結果の可視化 """
 
+import sys
+
+sys.path.append('../proj_LA/measure_similarities')
+
 from gpt2_measure_similarity import *
 
 import numpy as np
@@ -55,8 +59,10 @@ plt.ylim(0, 1)  # コサイン類似度は0から1の範囲
 plt.grid(axis='y')
 
 plt.tight_layout()  # レイアウトを調整
-plt.show()
 
+# グラフをファイルに保存 (PNG形式)
+plt.savefig("/home/s2410121/proj_LA/measure_similarities/gpt2/gpt2_barplot.png")
+plt.close()
 
 """ layerごとの絶対差の変遷のplot """
 
@@ -92,4 +98,7 @@ plt.title('Mean Absolute Differences Across Models')
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.show()
+
+# グラフをファイルに保存 (PNG形式)
+plt.savefig("/home/s2410121/proj_LA/measure_similarities/gpt2/gpt2_lineplot.png")
+plt.close()

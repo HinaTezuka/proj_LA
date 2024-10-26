@@ -3,6 +3,8 @@ memo:
 ・GPT-2-smallを対象に調査
 ・google colabですでに同じ検証をしている: https://colab.research.google.com/drive/1h_wSGMWQRtcdFM88tgZdc3qLQjtDSN1u#scrollTo=8TbA3b1uqPeW
 """
+import sys
+sys.path.append('../')
 
 from similarity_funcs import *
 
