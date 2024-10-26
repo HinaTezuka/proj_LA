@@ -46,7 +46,7 @@ def mutual_knn(feats_A, feats_B, topk):
 
     return acc.mean().item()
 
-def compute_nearest_neighbors(feats, topk=1):
+def compute_nearest_neighbors(feats, topk=5):
     """
     Compute the nearest neighbors of feats
     Args:
