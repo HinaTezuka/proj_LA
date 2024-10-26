@@ -7,9 +7,9 @@ import mutual_knn_acc_funcs
 """ Load models and tokenizers """
 model_base_name = "meta-llama/Meta-Llama-3-8B"  # English(L1) model
 # model_L2_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1"  # English + L2 model (Biltilingual)
-# model_L2_name = "DeepMount00/Llama-3-8b-Ita" # italian
+model_L2_name = "DeepMount00/Llama-3-8b-Ita" # italian
 # model_L2_name = "LiteLLMs/French-Alpaca-Llama3-8B-Instruct-v1.0-GGUF" # french
-model_L2_name = "DiscoResearch/Llama3-German-8B" # german
+# model_L2_name = "DiscoResearch/Llama3-German-8B" # german
 # model_L2_name = "beomi/Llama-3-KoEn-8B" # korean
 # model_L2_name = "ReBatch/Llama-3-8B-dutch" # dutch
 
@@ -30,8 +30,8 @@ if tokenizer_L2.pad_token is None:
 
 L2_iso_code = 'it'
 # tatoeba datasetsから対訳テキストを取得
-# texts_en, texts_L2 = mutual_knn_acc_funcs.get_texts_from_translation_corpus(100, L2_iso_code)
-texts_en, texts_L2 = mutual_knn_acc_funcs.get_texts_from_translation_corpus(100, "gem", "en_ger")
+texts_en, texts_L2 = mutual_knn_acc_funcs.get_texts_from_translation_corpus(100, L2_iso_code)
+# texts_en, texts_L2 = mutual_knn_acc_funcs.get_texts_from_translation_corpus(100, "gem", "en_ger")
 # culclate mutual_knn_acc
 mutual_knn_acc = mutual_knn_acc_funcs.compute_mutual_knn_acc(model_base, model_L2, tokenizer_base, tokenizer_L2, texts_en, texts_L2, 20)
 print(f"Mutual KNN Accuracy: {mutual_knn_acc}")
@@ -58,5 +58,5 @@ print(f"Mutual KNN Accuracy: {mutual_knn_acc}")
 
 # print(f"Mutual KNN Accuracy: {mutual_knn_accuracy}")
 
-with open("knn_acc_ko.txt", "w") as f:
-    f.write(f"Mutual KNN Accuracy: {mutual_knn_acc}\n")
+# with open("knn_acc_ko.txt", "w") as f:
+#     f.write(f"Mutual KNN Accuracy: {mutual_knn_acc}\n")

@@ -88,6 +88,7 @@ def compute_mutual_knn_acc(
     # representationsを抽出
     feats_base = extract_representations(model_base, model_base_tokenizer, texts_en)
     feats_L2 = extract_representations(model_L2, model_L2_tokenizer, texts_L2)
+    print(feats_base, '\n', feats_L2)
     mutual_knn_accuracy = mutual_knn(feats_base, feats_L2, topk)
 
     return mutual_knn_accuracy
