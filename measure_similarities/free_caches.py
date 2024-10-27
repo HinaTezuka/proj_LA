@@ -1,6 +1,8 @@
 """
 GPT2をロードしたメモリを解放（GPT2-smallをローカルで検証した場合。）
 """
+import sys
+sys.path.append('../gpt2')
 
 from gpt2_measure_similarity import *
 

@@ -1,7 +1,6 @@
 """ gpt2-smallの類似度・差異計算結果の可視化 """
 
 import sys
-
 sys.path.append('../proj_LA/measure_similarities')
 
 from gpt2_measure_similarity import *
