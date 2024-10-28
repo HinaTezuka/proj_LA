@@ -24,7 +24,7 @@ def acc_comparison(df) -> None:
     ax.legend(title='Model')
 
     # 画像ファイルとして保存
-    plt.savefig('images/accuracy_comparison.png', bbox_inches='tight')
+    plt.savefig('images/gpt2/accuracy_comparison_gpt2_en_ja_du.png', bbox_inches='tight')
 
 
 """ 各モデルごと """
@@ -45,7 +45,7 @@ def multiple_models_acc_comparison(df) -> None:
     plt.tight_layout(rect=[0, 0, 1, 0.96])  # サブプロットのタイトルのスペースを調整
 
     # 画像ファイルとして保存
-    plt.savefig('images/multiple_models_accuracy_comparison.png', bbox_inches='tight')
+    plt.savefig('images/gpt2/multiple_models_accuracy_comparison_gpt2_en_ja_du.png', bbox_inches='tight')
 
 
 """ 一番性能の良かったモデルのみを表示 """
@@ -99,4 +99,4 @@ def models_above_base_model(df) -> None:
 
     # 画像ファイルとして保存
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])  # 下部のマージンを調整
-    plt.savefig('images/models_above_gpt2_task_comparison_with_task_ratios.png', bbox_inches='tight')
+    plt.savefig('images/gpt2/models_above_gpt2_task_comparison_with_task_ratios_gpt2_en_ja_du.png', bbox_inches='tight')
