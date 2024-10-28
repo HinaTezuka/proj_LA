@@ -23,12 +23,12 @@ gpt2_model_spanish_name = "datificate/gpt2-small-spanish" # spa
 # モデルのロード
 gpt2_model_original = GPT2Model.from_pretrained(gpt2_model_original_name) # en
 gpt2_model_ja = GPT2Model.from_pretrained(gpt2_model_japanese_name) # ja
-gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name) # du
-gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name) # ger
-gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name) # ita
-gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name) # fre
-gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name) # ko
-gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
+# gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name) # du
+# gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name) # ger
+# gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name) # ita
+# gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name) # fre
+# gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name) # ko
+# gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
 
 """ それぞれのモデルのparametersを取得 """
 
