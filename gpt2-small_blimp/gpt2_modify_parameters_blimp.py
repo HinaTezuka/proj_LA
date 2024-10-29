@@ -105,7 +105,7 @@ def get_topk_outliers_parameters(m1_dict, m2_dict, topk: int) -> dict:
 #     return modified_L2_model
 
 """ topk個の差がある、L2_modelのパラメータをないものとするfunc """
-def skip_topk_diff_params_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
+def srelax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
     """
     topk個の差がある、L2_modelのパラメータをないものとした新しいL2モデルを返す
     """
