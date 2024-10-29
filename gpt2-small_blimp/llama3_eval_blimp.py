@@ -6,14 +6,12 @@ import pandas as pd
 
 # 使用するモデル名のリスト
 model_names = [
-                "gpt2", # base model: original gpt2(small) model : en
-                "rinna/japanese-gpt2-small", # ja
-                # "GroNLP/gpt2-small-dutch", # du
-                # "dbmdz/german-gpt2", # ger
-                # "GroNLP/gpt2-small-italian", # ita
-                # "dbddv01/gpt2-french-small", # fre
-                # "skt/kogpt2-base-v2", # ko
-                # "datificate/gpt2-small-spanish", # spa
+                # llama3-8b
+                "meta-llama/Meta-Llama-3-8B", # en
+                "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
+                "DiscoResearch/Llama3-German-8B", # ger
+                "DeepMount00/Llama-3-8b-Ita", # ita
+                "beomi/Llama-3-KoEn-8B", # ko
               ]
 
 # BLiMPの評価項目リスト
@@ -44,6 +42,7 @@ def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
 
 # データを保存するリスト
 results = []
+
 # 各モデルについてBLiMPのタスクを評価
 for model_name in model_names:
     # モデルとトークナイザーをロード
@@ -77,19 +76,8 @@ for model_name in model_names:
 df = pd.DataFrame(results)
 print(df)
 
-# 各モデルごとに正答率の平均を計算します
-overall_accuracy = df.groupby('Model')['Accuracy'].mean().reset_index()
-print(overall_accuracy)
-
-# 列名を変更してOVERALLにします
-overall_accuracy.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-
-with open('gpt2_blimp_en_du.txt', 'w') as f:
-    f.write(df.to_string(index=False))  # DataFrameを文字列に変換して書き込む
-
-
 # print(df)
 # CSVに保存
-# df.to_csv("blimp_evaluation_results_complete2_gpt2_all.csv", index=False)
+df.to_csv("blimp_evaluation_results_complete2_llama3_all.csv", index=False)
 
-# print("評価結果をcsv fileに保存しました。")
+print("評価結果をcsv fileに保存しました。")

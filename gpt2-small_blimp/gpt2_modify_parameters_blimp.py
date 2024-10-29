@@ -27,34 +27,34 @@ gpt2_model_spanish_name = "datificate/gpt2-small-spanish" # spa
 # モデルのロード
 gpt2_model_original = GPT2Model.from_pretrained(gpt2_model_original_name) # en
 gpt2_model_ja = GPT2Model.from_pretrained(gpt2_model_japanese_name) # ja
-# gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name) # du
-# gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name) # ger
-# gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name) # ita
-# gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name) # fre
-# gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name) # ko
-# gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
+gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name) # du
+gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name) # ger
+gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name) # ita
+gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name) # fre
+gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name) # ko
+gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
 
 """ それぞれのモデルのparametersを取得 """
 
 # parametersを取得 <- いくつかの辞書ではtransformerという接頭辞がついているため、記法を合わせるために削除(similarity_funcs.pyのdelete_transformer_prefixes_from_state_dict_keysを使用)
 state_dict_gpt2_original = gpt2_model_original.state_dict() # original(english)
 state_dict_gpt2_ja = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ja.state_dict()) # japanese
-# state_dict_gpt2_du = gpt2_model_du.state_dict() # dutch
-# state_dict_gpt2_ger = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ger.state_dict()) # german
-# state_dict_gpt2_ita = gpt2_model_ita.state_dict() # italian
-# state_dict_gpt2_fre = gpt2_model_fre.state_dict() # french
-# state_dict_gpt2_ko = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ko.state_dict()) # ko
-# state_dict_gpt2_spa = gpt2_model_spa.state_dict() # spanish
+state_dict_gpt2_du = gpt2_model_du.state_dict() # dutch
+state_dict_gpt2_ger = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ger.state_dict()) # german
+state_dict_gpt2_ita = gpt2_model_ita.state_dict() # italian
+state_dict_gpt2_fre = gpt2_model_fre.state_dict() # french
+state_dict_gpt2_ko = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ko.state_dict()) # ko
+state_dict_gpt2_spa = gpt2_model_spa.state_dict() # spanish
 
 # 各モデルのstate_dictのkeyの数、keyの名前が等しいことを確認： 確認済み
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_ja.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_ja.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_du.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_ger.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_ita.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_fre.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_ko.keys())
-print(state_dict_gpt2_original.keys() == state_dict_gpt2_spa.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_ja.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_ja.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_du.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_ger.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_ita.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_fre.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_ko.keys())
+# print(state_dict_gpt2_original.keys() == state_dict_gpt2_spa.keys())
 
 """ state_dictからoriginl modelと比べて差が大きすぎる特定のparametersを取得(上位kコ)するfunc """
 def get_topk_outliers_parameters(m1_dict, m2_dict, topk: int) -> dict:
@@ -87,18 +87,39 @@ def get_topk_outliers_parameters(m1_dict, m2_dict, topk: int) -> dict:
     return dict(sorted(abs_diff_descending_dict.items(), reverse=True))
 
 """ topk個の差がある、L2_modelのparametersを緩和するfunc """
-def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
-    """
-    元の差を1/2程度に緩和した新しいL2モデルを返す
-    """
-    # 新しいモデルを作成
-    modified_L2_model = L2_model.copy()  # L2_modelのコピーを作成
+# def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
+#     """
+#     元の差を1/2程度に緩和した新しいL2モデルを返す
+#     """
+#     # 新しいモデルを作成
+#     modified_L2_model = L2_model.copy()  # L2_modelのコピーを作成
 
-    # アウトライヤーのパラメータを緩和
+#     # アウトライヤーのパラメータを緩和
+#     for abs_diff, (layer_name, l2_param) in topk_abs_diff_dict.items():
+#         original_param = original_model[layer_name]  # 元のモデルのパラメータ
+#         # 差を1/2程度に緩和する
+#         adjusted_param = original_param + ((l2_param - original_param) / 2)
+#         # modified L2モデルのパラメータを更新
+#         modified_L2_model[layer_name] = adjusted_param
+
+#     return modified_L2_model
+
+""" topk個の差がある、L2_modelのパラメータをないものとするfunc """
+def skip_topk_diff_params_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
+    """
+    topk個の差がある、L2_modelのパラメータをないものとした新しいL2モデルを返す
+    """
+    # L2_modelのコピーを作成
+    modified_L2_model = L2_model.copy()
+
+    # outliersのパラメータを緩和
     for abs_diff, (layer_name, l2_param) in topk_abs_diff_dict.items():
-        original_param = original_model[layer_name]  # 元のモデルのパラメータ
-        # 差を1/2程度に緩和する
-        adjusted_param = original_param + ((l2_param - original_param) / 2)
+        original_param = original_model[layer_name]  # 元のモデルのパラメータ取得
+        shape = original_param.shape  # パラメータの形状を取得
+
+        # 全ての値を1にしたテンソルを作成
+        adjusted_param = torch.ones(shape, dtype=original_param.dtype, device=original_param.device)
+
         # modified L2モデルのパラメータを更新
         modified_L2_model[layer_name] = adjusted_param
 
@@ -106,18 +127,28 @@ def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
 
 
 """ ちゃんと緩和されているかテスト """
-topk = 20
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ja, topk)
-modified_L2_model = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ja, topk_outliers)
-print(topk_outliers.keys())
-print('\n')
-print('---------------------------------------------------------------')
-print('\n')
-topk_outliers_modified = get_topk_outliers_parameters(state_dict_gpt2_original, modified_L2_model, topk)
-print(topk_outliers_modified.keys())
+# topk = 5
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ja, topk)
+# modified_L2_model = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ja, topk_outliers)
+# print(topk_outliers.keys())
+# print('\n')
+# print('---------------------------------------------------------------')
+# print('\n')
+# topk_outliers_modified = get_topk_outliers_parameters(state_dict_gpt2_original, modified_L2_model, topk)
+# print(topk_outliers_modified.keys())
 
-""" それぞれのL2モデルのmodified versionを作成 """
-topk = 20
+""" それぞれのL2モデルのmodified versionを作成 / すべてのモデルを用意 """
+models = []
+model_names = [
+                "rinna/japanese-gpt2-small", "rinna/japanese-gpt2-small", # ja
+                "GroNLP/gpt2-small-dutch", "GroNLP/gpt2-small-dutch", # du
+                "dbmdz/german-gpt2", "dbmdz/german-gpt2", # ger
+                "GroNLP/gpt2-small-italian",  "GroNLP/gpt2-small-italian", # ita
+                "dbddv01/gpt2-french-small", "dbddv01/gpt2-french-small", # fre
+                "skt/kogpt2-base-v2", "skt/kogpt2-base-v2", # ko
+                "datificate/gpt2-small-spanish", "datificate/gpt2-small-spanish" # spa
+            ]
+topk = 5
 """ japanese """
 # topkこのoutliers(base modelと比べて、一番差があるパラメータを持つ層)を取得
 topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ja, topk)
@@ -126,119 +157,109 @@ modified_ja_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, st
 # L1->L2モデルのロード
 gpt2_model_ja = GPT2Model.from_pretrained(gpt2_model_japanese_name)
 gpt2_model_ja_modified.load_state_dict(modified_ja_model_dict)
-# test
-print(gpt2_model_ja_modified.state_dict)
-topk_outliers_modified = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ja_modified, topk)
-print(topk_outliers_modified.keys())
+# modelsに追加
+models.append(gpt2_model_ja)
+models.append(gpt2_model_ja_modified)
 
-# """ dutch """
-# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_du, topk)
-# modified_du_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_du, topk_outliers)
-# gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name)
-# gpt2_model_du_modified.load_state_dict(modified_du_model_dict)
-# """ german """
-# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ger, topk)
-# modified_ger_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ger, topk_outliers)
-# gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name)
-# gpt2_model_ger_modified.load_state_dict(modified_ger_model_dict)
-# """ italy """
-# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ita, topk)
-# modified_ita_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ita, topk_outliers)
-# gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name)
-# gpt2_model_ita_modified.load_state_dict(modified_ita_model_dict)
-# """ french """
-# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_fre, topk)
-# modified_fre_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_fre, topk_outliers)
-# gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_italian_name)
-# gpt2_model_fre_modified.load_state_dict(modified_fre_model_dict)
-# """ korean """
-# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ko, topk)
-# modified_ko_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ko, topk_outliers)
-# gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name)
-# gpt2_model_ko_modified.load_state_dict(modified_ko_model_dict)
-# """ spanish """
-# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_spa, topk)
-# modified_spa_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_spa, topk_outliers)
-# gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name)
-# gpt2_model_spa_modified.load_state_dict(modified_spa_model_dict)
+
+""" dutch """
+topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_du, topk)
+modified_du_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_du, topk_outliers)
+gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name)
+gpt2_model_du_modified.load_state_dict(modified_du_model_dict)
+
+models.append(gpt2_model_du)
+models.append(gpt2_model_du_modified)
+""" german """
+topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ger, topk)
+modified_ger_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ger, topk_outliers)
+gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name)
+gpt2_model_ger_modified.load_state_dict(modified_ger_model_dict)
+
+models.append(gpt2_model_ger)
+models.append(gpt2_model_ger_modified)
+""" italy """
+topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ita, topk)
+modified_ita_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ita, topk_outliers)
+gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name)
+gpt2_model_ita_modified.load_state_dict(modified_ita_model_dict)
+
+models.append(gpt2_model_ita)
+models.append(gpt2_model_ita_modified)
+""" french """
+topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_fre, topk)
+modified_fre_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_fre, topk_outliers)
+gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name)
+gpt2_model_fre_modified.load_state_dict(modified_fre_model_dict)
+
+models.append(gpt2_model_fre)
+models.append(gpt2_model_fre_modified)
+""" korean """
+topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ko, topk)
+modified_ko_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ko, topk_outliers)
+gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name)
+gpt2_model_ko_modified.load_state_dict(modified_ko_model_dict)
+
+models.append(gpt2_model_ko)
+models.append(gpt2_model_ko_modified)
+""" spanish """
+topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_spa, topk)
+modified_spa_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_spa, topk_outliers)
+gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name)
+gpt2_model_spa_modified.load_state_dict(modified_spa_model_dict)
+
+models.append(gpt2_model_spa)
+models.append(gpt2_model_spa_modified)
 
 """ それぞれ、modify前のモデルと、modify後のBLiMPの精度を測る """
 # BLiMPの評価項目リスト
 configs = get_dataset_config_names("blimp")
 
-def evaluate_model_on_blimp(model, config):
-    # BliMPデータセットを読み込む
-    blimp_dataset = load_dataset("blimp")
+results = []
+# 各モデルについてBLiMPのタスクを評価
+for model, model_name in zip(models, models_names):
+    # トークナイザーをロード
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # テストデータをデータローダーでバッチ処理
-    test_loader = DataLoader(blimp_dataset['test'], batch_size=config['batch_size'])
-
-    model.eval()  # モデルを評価モードにする
-    all_preds = []
-    all_labels = []
-
-    with torch.no_grad():  # 勾配計算を無効にする
-        for batch in test_loader:
-            inputs = batch['input_ids'].to(config['device'])  # 入力をデバイスに移動
-            labels = batch['labels'].to(config['device'])  # ラベルをデバイスに移動
-
-            outputs = model(inputs)  # モデルの出力を取得
-            logits = outputs.logits  # ロジットを取得
-            preds = torch.argmax(logits, dim=-1)  # 最も高いロジットを持つクラスを予測
-
-            all_preds.extend(preds.cpu().numpy())  # CPUに戻してからリストに追加
-            all_labels.extend(labels.cpu().numpy())
-
-    # 精度を計算
-    accuracy = accuracy_score(all_labels, all_preds)
-    return accuracy
-
-# BLiMPデータセットを評価し、結果を保存する関数
-def evaluate_models_on_blimp(models, configs):
-    results = defaultdict(dict)
-
+    # 各評価項目ごとに評価
     for config in configs:
-        # 各モデルに対してBLiMPデータセットを評価
-        for model_name, model in models.items():
-            accuracy = evaluate_model_on_blimp(model, config)  # 評価関数は適宜定義する必要があります
-            results[config][model_name] = accuracy
+        blimp = load_dataset("blimp", config)
+        correct = 0
+        total = 0
 
-    return results
+        for example in blimp["train"]:
+            sentence1 = example["sentence_good"]
+            sentence2 = example["sentence_bad"]
+            score1, score2 = evaluate_sentence_pair(model, tokenizer, sentence1, sentence2)
 
-# モデルを辞書として格納
-models = {
-    "Original Japanese Model": gpt2_model_ja,
-    "Modified Japanese Model": gpt2_model_ja_modified,
-    # "Original Dutch Model": gpt2_model_du,
-    # "Modified Dutch Model": gpt2_model_du_modified,
-    # "Original German Model": gpt2_model_ger,
-    # "Modified German Model": gpt2_model_ger_modified,
-    # "Original Italian Model": gpt2_model_ita,
-    # "Modified Italian Model": gpt2_model_ita_modified,
-    # "Original French Model": gpt2_model_fre,
-    # "Modified French Model": gpt2_model_fre_modified,
-    # "Original Korean Model": gpt2_model_ko,
-    # "Modified Korean Model": gpt2_model_ko_modified,
-    # "Original Spanish Model": gpt2_model_spa,
-    # "Modified Spanish Model": gpt2_model_spa_modified,
-}
+            if score1 > score2:
+                correct += 1
+            total += 1
 
-# BLiMPデータセットを評価
-blimp_results = evaluate_models_on_blimp(models, configs)
+        # 精度を計算して結果を保存
+        accuracy = correct / total
+        results.append({
+            "Model": model_name,
+            "Task": config,
+            "Accuracy": accuracy
+        })
 
-# 結果をDataFrameに変換
-results_df = pd.DataFrame(blimp_results)
 
-# 各文法項目に対する各モデルの正答率を表示
-print(results_df)
+""" result """
 
-# 各fieldごとに正答率を計算
-field_accuracies = results_df.mean(axis=0)  # 各列（モデル）ごとの平均を計算
+# データフレームに変換
+df = pd.DataFrame(results)
+# print(df)
 
-# 各fieldごとの結果もDataFrameに追加
-results_df.loc['Field Average'] = field_accuracies
+# 各モデルごとに正答率の平均を計算します
+overall_accuracy = df.groupby('Model')['Accuracy'].mean().reset_index()
+print(f'overall accuracy: {overall_accuracy}')
 
-# DataFrameをCSVファイルに保存
-# results_df.to_csv('blimp_results.csv', index=True)
+# 列名を変更してOVERALLにします
+overall_accuracy.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
-# print("Results saved to blimp_results.csv")
+print(df)
+# CSVに保存
+df.to_csv("blimp_gpt2_modified_ALL.csv", index=False)
+
+print("評価結果をcsv fileに保存しました。")

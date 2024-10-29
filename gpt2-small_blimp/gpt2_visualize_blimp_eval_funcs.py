@@ -1,15 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# CSVファイルをDataFrameとして読み込み
-file_path = "/home/s2410121/proj_LA/gpt2-small_blimp/blimp_evaluation_results_test.csv"  # 実際のCSVファイルのパスに置き換えてください
-# CSVファイルを読み込む
-# データの読み込み
-data = pd.read_csv(file_path)
-# df = pd.read_csv(file_path)  # 適切なファイルパスに置き換えてください
-
 """ 各モデルのaccuracyを単純に比較 """
-def acc_comparison(df) -> None:
+def acc_comparison(data: pd.DataFrame, model_name: str, file_name: str) -> None:
     # モデルごとにフィルタリングして可視化
     models = data['Model'].unique()
     fig, ax = plt.subplots(figsize=(15, 10))
@@ -24,11 +17,11 @@ def acc_comparison(df) -> None:
     ax.legend(title='Model')
 
     # 画像ファイルとして保存
-    plt.savefig('images/gpt2/accuracy_comparison_gpt2_en_ja_du.png', bbox_inches='tight')
+    plt.savefig(f'images/{model_name}/accuracy_comparison_{file_name}.png', bbox_inches='tight')
 
 
 """ 各モデルごと """
-def multiple_models_acc_comparison(df) -> None:
+def multiple_models_acc_comparison(data: pd.DataFrame, model_name: str, file_name: str) -> None:
     models = data['Model'].unique()
     # サブプロットの作成
     num_models = len(models)
@@ -45,13 +38,13 @@ def multiple_models_acc_comparison(df) -> None:
     plt.tight_layout(rect=[0, 0, 1, 0.96])  # サブプロットのタイトルのスペースを調整
 
     # 画像ファイルとして保存
-    plt.savefig('images/gpt2/multiple_models_accuracy_comparison_gpt2_en_ja_du.png', bbox_inches='tight')
+    plt.savefig(f'images/{model_name}/multiple_models_accuracy_comparison_{file_name}.png', bbox_inches='tight')
 
 
 """ 一番性能の良かったモデルのみを表示 """
-def models_above_base_model(df) -> None:
+def models_above_base_model(data: pd.DataFrame, model_name: str, file_name: str) -> None:
     # GPT-2の精度を取得
-    baseline_accuracy = data.loc[data['Model'] == 'gpt2', 'Accuracy'].values[0]
+    baseline_accuracy = data.loc[data['Model'] == f'{model_name}', 'Accuracy'].values[0]
     print(baseline_accuracy)
 
     # GPT-2を上回るモデルがあるタスクを特定
@@ -99,4 +92,4 @@ def models_above_base_model(df) -> None:
 
     # 画像ファイルとして保存
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])  # 下部のマージンを調整
-    plt.savefig('images/gpt2/models_above_gpt2_task_comparison_with_task_ratios_gpt2_en_ja_du.png', bbox_inches='tight')
+    plt.savefig(f'images/{model_name}/models_above_gpt2_task_comparison_with_task_ratios_{file_name}.png', bbox_inches='tight')

@@ -27,6 +27,7 @@ model_names = [
 
 # BLiMPの評価項目リスト
 configs = get_dataset_config_names("blimp")
+# print(len(configs))
 
 # 評価関数
 def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
