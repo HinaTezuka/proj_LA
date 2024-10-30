@@ -1,13 +1,14 @@
 import os
 import sys
 sys.path.append('/home/s2410121/proj_LA/measure_similarities')
+sys.path.append('/home/s2410121/proj_LA/gpt2-small_blimp')
 
 import torch
 
 from collections import defaultdict
-from transformers import AutoModel, GPT2Model
+from transformers import AutoModel, GPT2Model, AutoTokenizer
 from datasets import load_dataset, get_dataset_config_names
-from gpt2_eval_blimp import *
+import gpt2_eval_blimp
 from similarity_funcs import *
 
 # モデルの指定
@@ -24,12 +25,12 @@ gpt2_model_spanish_name = "datificate/gpt2-small-spanish" # spa
 # モデルのロード
 gpt2_model_original = GPT2Model.from_pretrained(gpt2_model_original_name) # en
 gpt2_model_ja = GPT2Model.from_pretrained(gpt2_model_japanese_name) # ja
-gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name) # du
-gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name) # ger
-gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name) # ita
-gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name) # fre
-gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name) # ko
-gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
+# gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name) # du
+# gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name) # ger
+# gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name) # ita
+# gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name) # fre
+# gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name) # ko
+# gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
 
 """ それぞれのモデルのparametersを取得 """
 
@@ -83,44 +84,19 @@ def get_topk_outliers_parameters(m1_dict, m2_dict, topk: int) -> dict:
     # 絶対値の差で降順にソート
     return dict(sorted(abs_diff_descending_dict.items(), reverse=True))
 
-""" topk個の差がある、L2_modelのparametersを緩和するfunc """
-def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
-    """
-    元の差を1/2程度に緩和した新しいL2モデルを返す
-    """
-    # 新しいモデルを作成
-    modified_L2_model = L2_model.copy()  # L2_modelのコピーを作成
 
+""" topk個の差がある、L2_modelのparametersを緩和するfunc (戻り値はmodifyされたstate_dict)"""
+def relax_abs_diff_of_L2_model(original_model_dict, L2_model_dict, topk_abs_diff_dict):
+    """
+    元の差を0にした新しいL2モデルを返す
+    """
     # アウトライヤーのパラメータを緩和
     for abs_diff, (layer_name, l2_param) in topk_abs_diff_dict.items():
-        original_param = original_model[layer_name]  # 元のモデルのパラメータ
-        # 差を1/2程度に緩和する
-        adjusted_param = original_param + ((l2_param - original_param) / 2)
-        # modified L2モデルのパラメータを更新
-        modified_L2_model[layer_name] = adjusted_param
+        original_param = original_model_dict[layer_name]  # 元のモデルのパラメータ
+        # 差を0にして、modified L2モデルのパラメータを更新
+        L2_model_dict[layer_name] = original_param
 
-    return modified_L2_model
-
-""" topk個の差がある、L2_modelのパラメータをないものとするfunc """
-# def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
-#     """
-#     topk個の差がある、L2_modelのパラメータをないものとした新しいL2モデルを返す
-#     """
-#     # L2_modelのコピーを作成
-#     modified_L2_model = L2_model.copy()
-
-#     # outliersのパラメータを緩和
-#     for abs_diff, (layer_name, l2_param) in topk_abs_diff_dict.items():
-#         original_param = original_model[layer_name]  # 元のモデルのパラメータ取得
-#         shape = original_param.shape  # パラメータの形状を取得
-
-#         # 全ての値を1にしたテンソルを作成
-#         adjusted_param = torch.ones(shape, dtype=original_param.dtype, device=original_param.device)
-
-#         # modified L2モデルのパラメータを更新
-#         modified_L2_model[layer_name] = adjusted_param
-
-#     return modified_L2_model
+    return L2_model_dict
 
 
 """ ちゃんと緩和されているかテスト """
@@ -146,75 +122,78 @@ model_names = [
                 "datificate/gpt2-small-spanish" # spa
             ]
 topk = 10
+
 """ japanese """
 # topkこのoutliers(base modelと比べて、一番差があるパラメータを持つ層)を取得
 topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ja, topk)
-# topkこの層のパラメータに対して緩和操作を実施
-modified_ja_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ja, topk_outliers)
+# topkこの層のパラメータに対して緩和操作を実施 <- 戻り値はstate_dict
+modified_ja_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ja, topk_outliers)
 # L1->L2モデルのロード
 gpt2_model_ja = GPT2Model.from_pretrained(gpt2_model_japanese_name)
-gpt2_model_ja_modified = gpt2_model_ja.load_state_dict(modified_ja_model_dict)
+gpt2_model_ja = gpt2_model_ja.load_state_dict(modified_ja_dict)
+gpt2_model_ja_modified = gpt2_model_ja
 # modelsに追加
 # models.append(gpt2_model_ja)
 models.append(gpt2_model_ja_modified)
 
 
 """ dutch """
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_du, topk)
-modified_du_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_du, topk_outliers)
-gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name)
-gpt2_model_du_modified = gpt2_model_du.load_state_dict(modified_du_model_dict)
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_du, topk)
+# modified_du_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_du, topk_outliers)
+# gpt2_model_du = GPT2Model.from_pretrained(gpt2_model_dutch_name)
+# gpt2_model_du_modified = gpt2_model_du.load_state_dict(modified_du_model_dict)
 
-# models.append(gpt2_model_du)
-models.append(gpt2_model_du_modified)
-""" german """
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ger, topk)
-modified_ger_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ger, topk_outliers)
-gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name)
-gpt2_model_ger_modified = gpt2_model_ger.load_state_dict(modified_ger_model_dict)
+# # models.append(gpt2_model_du)
+# models.append(gpt2_model_du_modified)
+# """ german """
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ger, topk)
+# modified_ger_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ger, topk_outliers)
+# gpt2_model_ger = GPT2Model.from_pretrained(gpt2_model_german_name)
+# gpt2_model_ger_modified = gpt2_model_ger.load_state_dict(modified_ger_model_dict)
 
-# models.append(gpt2_model_ger)
-models.append(gpt2_model_ger_modified)
-""" italy """
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ita, topk)
-modified_ita_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ita, topk_outliers)
-gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name)
-gpt2_model_ita_modified = gpt2_model_ita.load_state_dict(modified_ita_model_dict)
+# # models.append(gpt2_model_ger)
+# models.append(gpt2_model_ger_modified)
+# """ italy """
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ita, topk)
+# modified_ita_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ita, topk_outliers)
+# gpt2_model_ita = GPT2Model.from_pretrained(gpt2_model_italian_name)
+# gpt2_model_ita_modified = gpt2_model_ita.load_state_dict(modified_ita_model_dict)
 
-# models.append(gpt2_model_ita)
-models.append(gpt2_model_ita_modified)
-""" french """
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_fre, topk)
-modified_fre_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_fre, topk_outliers)
-gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name)
-gpt2_model_fre_modified = gpt2_model_fre.load_state_dict(modified_fre_model_dict)
+# # models.append(gpt2_model_ita)
+# models.append(gpt2_model_ita_modified)
+# """ french """
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_fre, topk)
+# modified_fre_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_fre, topk_outliers)
+# gpt2_model_fre = GPT2Model.from_pretrained(gpt2_model_french_name)
+# gpt2_model_fre_modified = gpt2_model_fre.load_state_dict(modified_fre_model_dict)
 
-# models.append(gpt2_model_fre)
-models.append(gpt2_model_fre_modified)
-""" korean """
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ko, topk)
-modified_ko_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ko, topk_outliers)
-gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name)
-gpt2_model_ko_modified = gpt2_model_ko.load_state_dict(modified_ko_model_dict)
+# # models.append(gpt2_model_fre)
+# models.append(gpt2_model_fre_modified)
+# """ korean """
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_ko, topk)
+# modified_ko_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_ko, topk_outliers)
+# gpt2_model_ko = GPT2Model.from_pretrained(gpt2_model_korean_name)
+# gpt2_model_ko_modified = gpt2_model_ko.load_state_dict(modified_ko_model_dict)
 
-# models.append(gpt2_model_ko)
-models.append(gpt2_model_ko_modified)
-""" spanish """
-topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_spa, topk)
-modified_spa_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_spa, topk_outliers)
-gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name)
-gpt2_model_spa_modified = gpt2_model_spa.load_state_dict(modified_spa_model_dict)
+# # models.append(gpt2_model_ko)
+# models.append(gpt2_model_ko_modified)
+# """ spanish """
+# topk_outliers = get_topk_outliers_parameters(state_dict_gpt2_original, state_dict_gpt2_spa, topk)
+# modified_spa_model_dict = relax_abs_diff_of_L2_model(state_dict_gpt2_original, state_dict_gpt2_spa, topk_outliers)
+# gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name)
+# gpt2_model_spa_modified = gpt2_model_spa.load_state_dict(modified_spa_model_dict)
 
 # models.append(gpt2_model_spa)
-models.append(gpt2_model_spa_modified)
+# models.append(gpt2_model_spa_modified)
 
 """ それぞれ、modify前のモデルと、modify後のBLiMPの精度を測る """
 # BLiMPの評価項目リスト
 configs = get_dataset_config_names("blimp")
+configs = ['adjunct_island']
 
 results = []
 # 各モデルについてBLiMPのタスクを評価
-for model, model_name in zip(models, models_names):
+for model, model_name in zip(models, model_names):
     # トークナイザーをロード
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -227,7 +206,7 @@ for model, model_name in zip(models, models_names):
         for example in blimp["train"]:
             sentence1 = example["sentence_good"]
             sentence2 = example["sentence_bad"]
-            score1, score2 = evaluate_sentence_pair(model, tokenizer, sentence1, sentence2)
+            score1, score2 = gpt2_eval_blimp.evaluate_sentence_pair(model, tokenizer, sentence1, sentence2)
 
             if score1 > score2:
                 correct += 1

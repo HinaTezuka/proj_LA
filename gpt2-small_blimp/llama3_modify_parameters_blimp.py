@@ -5,9 +5,9 @@ sys.path.append('/home/s2410121/proj_LA/measure_similarities')
 import torch
 
 from collections import defaultdict
-from transformers import AutoModel
+from transformers import AutoModel, AutoTokenizer
 from datasets import load_dataset, get_dataset_config_names
-from gpt2_eval_blimp import *
+import llama3_eval_blimp
 from similarity_funcs import *
 
 # モデルの指定
@@ -77,23 +77,36 @@ def get_topk_outliers_parameters(m1_dict, m2_dict, topk: int) -> dict:
     # 絶対値の差で降順にソート
     return dict(sorted(abs_diff_descending_dict.items(), reverse=True))
 
-""" topk個の差がある、L2_modelのparametersを緩和するfunc """
-def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
+""" topk個の差がある、L2_modelのparametersを緩和するfunc (戻り値はmodifyされたstate_dict)"""
+def relax_abs_diff_of_L2_model(original_model_dict, L2_model_dict, topk_abs_diff_dict):
     """
-    元の差を1/2程度に緩和した新しいL2モデルを返す
+    元の差を0にした新しいL2モデルを返す
     """
-    # 新しいモデルを作成
-    modified_L2_model = L2_model.copy()  # L2_modelのコピーを作成
-
     # アウトライヤーのパラメータを緩和
     for abs_diff, (layer_name, l2_param) in topk_abs_diff_dict.items():
-        original_param = original_model[layer_name]  # 元のモデルのパラメータ
-        # 差を1/2程度に緩和する
-        adjusted_param = original_param + ((l2_param - original_param) / 2)
-        # modified L2モデルのパラメータを更新
-        modified_L2_model[layer_name] = adjusted_param
+        original_param = original_model_dict[layer_name]  # 元のモデルのパラメータ
+        # 差を0にして、modified L2モデルのパラメータを更新
+        L2_model_dict[layer_name] = original_param
 
-    return modified_L2_model
+    return L2_model_dict
+
+""" topk個の差がある、L2_modelのparametersを緩和するfunc """
+# def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
+#     """
+#     元の差を1/2程度に緩和した新しいL2モデルを返す
+#     """
+#     # 新しいモデルを作成
+#     modified_L2_model = L2_model.copy()  # L2_modelのコピーを作成
+
+#     # アウトライヤーのパラメータを緩和
+#     for abs_diff, (layer_name, l2_param) in topk_abs_diff_dict.items():
+#         original_param = original_model[layer_name]  # 元のモデルのパラメータ
+#         # 差を1/2程度に緩和する
+#         adjusted_param = original_param + ((l2_param - original_param) / 2)
+#         # modified L2モデルのパラメータを更新
+#         modified_L2_model[layer_name] = adjusted_param
+
+#     return modified_L2_model
 
 """ topk個の差がある、L2_modelのパラメータをないものとするfunc """
 # def relax_abs_diff_of_L2_model(original_model, L2_model, topk_abs_diff_dict):
@@ -144,38 +157,36 @@ topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_di
 # topkこの層のパラメータに対して緩和操作を実施
 modified_ja_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ja, topk_outliers)
 # L1->L2モデルのロード
-llama_model_ja = AutoModel.from_pretrained(llama_model_ja_name)
 llama_model_ja_modified = llama_model_ja.load_state_dict(modified_ja_model_dict)
 # modelsに追加
-# models.append(llama_model_ja)
 models.append(llama_model_ja_modified)
 
-""" german """
-topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_dict_llama_ger, topk)
-modified_ger_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ger, topk_outliers)
-llama_model_ger = AutoModelModel.from_pretrained(llama_model_ger_name)
-llama_model_ger_modified = llama_model_ger.load_state_dict(modified_ger_model_dict)
+# """ german """
+# topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_dict_llama_ger, topk)
+# modified_ger_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ger, topk_outliers)
+# llama_model_ger = AutoModelModel.from_pretrained(llama_model_ger_name)
+# llama_model_ger_modified = llama_model_ger.load_state_dict(modified_ger_model_dict)
 
-# models.append(llama_model_ger)
-models.append(llama_model_ger_modified)
+# # models.append(llama_model_ger)
+# models.append(llama_model_ger_modified)
 
-""" italy """
-topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_dict_llama_ita, topk)
-modified_ita_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ita, topk_outliers)
-llama_model_ita = AutoModel.from_pretrained(llama_model_ita_name)
-llama_model_ita_modified = llama_model_ger.load_state_dict(modified_ita_model_dict)
+# """ italy """
+# topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_dict_llama_ita, topk)
+# modified_ita_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ita, topk_outliers)
+# llama_model_ita = AutoModel.from_pretrained(llama_model_ita_name)
+# llama_model_ita_modified = llama_model_ger.load_state_dict(modified_ita_model_dict)
 
-# models.append(llama_model_ger)
-models.append(llama_model_ita_modified))
+# # models.append(llama_model_ger)
+# models.append(llama_model_ita_modified)
 
-""" korean """
-topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_dict_llama_ko, topk)
-modified_ko_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ko, topk_outliers)
-llama_model_ko = AutoModel.from_pretrained(llama_model_ko_name)
-llama_model_ko_modified = llama_model_ko.load_state_dict(modified_ger_model_dict)
+# """ korean """
+# topk_outliers = get_topk_outliers_parameters(state_dict_llama_original, state_dict_llama_ko, topk)
+# modified_ko_model_dict = relax_abs_diff_of_L2_model(state_dict_llama_original, state_dict_llama_ko, topk_outliers)
+# llama_model_ko = AutoModel.from_pretrained(llama_model_ko_name)
+# llama_model_ko_modified = llama_model_ko.load_state_dict(modified_ger_model_dict)
 
-# models.append(llama_model_ger)
-models.append(llama_model_ko_modified)
+# # models.append(llama_model_ger)
+# models.append(llama_model_ko_modified)
 
 
 """ それぞれ、modify前のモデルと、modify後のBLiMPの精度を測る """
@@ -197,7 +208,7 @@ for model, model_name in zip(models, models_names):
         for example in blimp["train"]:
             sentence1 = example["sentence_good"]
             sentence2 = example["sentence_bad"]
-            score1, score2 = evaluate_sentence_pair(model, tokenizer, sentence1, sentence2)
+            score1, score2 = llama3_eval_blimp.evaluate_sentence_pair(model, tokenizer, sentence1, sentence2)
 
             if score1 > score2:
                 correct += 1
