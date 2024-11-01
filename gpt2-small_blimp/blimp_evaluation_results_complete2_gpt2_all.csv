@@ -1,0 +1,2 @@
+Model,Task,Accuracy
+GroNLP/gpt2-small-dutch,adjunct_island,0.34

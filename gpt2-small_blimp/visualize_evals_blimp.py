@@ -14,11 +14,11 @@ from gpt2_visualize_blimp_eval_funcs import *
 # models_above_base_model(data)
 
 """ gpt2 """
-file_path_gpt2_ALL = "/home/s2410121/proj_LA/blimp_evaluation_results_complete2_gpt2_all.csv"
-data_gpt2_ALL = pd.read_csv(file_path_gpt2_ALL)
-acc_comparison(data_gpt2_ALL, "gpt2", "gpt2_ALL")
-multiple_models_acc_comparison(data_gpt2_ALL, "gpt2", "gpt2_ALL")
-print(data_gpt2_ALL)
+# file_path_gpt2_ALL = "/home/s2410121/proj_LA/blimp_evaluation_results_complete2_gpt2_all.csv"
+# data_gpt2_ALL = pd.read_csv(file_path_gpt2_ALL)
+# acc_comparison(data_gpt2_ALL, "gpt2", "gpt2_ALL")
+# multiple_models_acc_comparison(data_gpt2_ALL, "gpt2", "gpt2_ALL")
+# print(data_gpt2_ALL)
 # data_gpt2_ALL['overall'] =
 
 """ en_japanese """
@@ -32,6 +32,12 @@ print(data_gpt2_ALL)
 # acc_comparison(data_gpt2_en_du, "gpt2", "gpt2_en_du")
 # multiple_models_acc_comparison(data_gpt2_en_du, "gpt2", "gpt2_en_du")
 
+""" modify_ja """
+file_path_gpt2_mo_ja = "/home/s2410121/proj_LA/gpt2-small_blimp/blimp_gpt2_modified_ALL_1_2.csv"
+data_gpt2_mo_ja = pd.read_csv(file_path_gpt2_mo_ja)
+acc_comparison(data_gpt2_mo_ja, "gpt2", "gpt2_mo_ja")
+multiple_models_acc_comparison(data_gpt2_mo_ja, "gpt2", "gpt2_mo_ja")
+# print(data_gpt2_ALL)
 
 """ llama3 """
 

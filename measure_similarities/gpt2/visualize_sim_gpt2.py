@@ -101,3 +101,112 @@ plt.tight_layout()
 # グラフをファイルに保存 (PNG形式)
 plt.savefig("/home/s2410121/proj_LA/measure_similarities/gpt2/gpt2_lineplot.png")
 plt.close()
+
+
+""" """
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 各言語のモデルを定義（gpt2を除く）
+language_models = ['en_ja', 'en_du', 'en_ger', 'en_ita', 'en_fre', 'en_ko', 'en_spa']
+
+# 各レイヤーの重みを保存する辞書を作成
+layer_types = {
+    'Embedding': [],
+    'Attention': [],
+    'MLP': [],
+    'LayerNorm': []
+}
+
+# 各言語モデルごとに処理
+for model_name in language_models:
+    changes = weight_changes_gpt2[model_name]  # モデルの重み変化を取得
+    for layer_name, values in changes.items():
+        # レイヤー名に応じてリストに追加
+        if 'wte' in layer_name:  # Embedding
+            layer_types['Embedding'].append(values['mean_absolute_difference'])
+        elif 'attn' in layer_name:  # Attention
+            layer_types['Attention'].append(values['mean_absolute_difference'])
+        elif 'mlp' in layer_name:  # MLP
+            layer_types['MLP'].append(values['mean_absolute_difference'])
+        elif 'ln' in layer_name:  # LayerNorm
+            layer_types['LayerNorm'].append(values['mean_absolute_difference'])
+
+# 各レイヤーごとの平均絶対差を計算
+mean_layer_diffs = {layer: np.mean(diffs) for layer, diffs in layer_types.items() if diffs}
+
+# 可視化 (レイヤーごとの平均絶対差を折れ線グラフで表示)
+plt.figure(figsize=(10, 6))
+plt.plot(mean_layer_diffs.keys(), mean_layer_diffs.values(), marker='o')
+plt.xlabel('Layer Type')
+plt.ylabel('Mean Absolute Difference')
+plt.title('Mean Absolute Differences Across Layer Types (Excluding GPT-2 Base Model)')
+plt.grid()
+plt.tight_layout()
+
+# グラフをファイルに保存 (PNG形式)
+plt.savefig("/home/s2410121/proj_LA/measure_similarities/gpt2/gpt2_layer_mean_abs_diff_excluding_base.png")
+plt.close()
+
+# 各言語のモデルを定義（gpt2を除く）
+language_models = ['en_ja', 'en_du', 'en_ger', 'en_ita', 'en_fre', 'en_ko', 'en_spa']
+
+# 各レイヤーの重みを保存する辞書を作成
+layer_types = {
+    'Embedding': [],
+    'Attention': [],
+    'MLP': [],
+    'LayerNorm': []
+}
+
+# 各言語モデルごとにアーキテクチャを特定して保存
+architecture_mean_diffs = {}
+
+# 各言語モデルごとに処理
+for model_name in language_models:
+    architecture = model_name.split('_')[1]  # アーキテクチャを取得
+    changes = weight_changes_gpt2[model_name]  # モデルの重み変化を取得
+
+    # アーキテクチャごとのレイヤーの差を初期化
+    if architecture not in architecture_mean_diffs:
+        architecture_mean_diffs[architecture] = {
+            'Embedding': [],
+            'Attention': [],
+            'MLP': [],
+            'LayerNorm': []
+        }
+
+    for layer_name, values in changes.items():
+        # レイヤー名に応じてリストに追加
+        if 'wte' in layer_name:  # Embedding
+            architecture_mean_diffs[architecture]['Embedding'].append(values['mean_absolute_difference'])
+        elif 'attn' in layer_name:  # Attention
+            architecture_mean_diffs[architecture]['Attention'].append(values['mean_absolute_difference'])
+        elif 'mlp' in layer_name:  # MLP
+            architecture_mean_diffs[architecture]['MLP'].append(values['mean_absolute_difference'])
+        elif 'ln' in layer_name:  # LayerNorm
+            architecture_mean_diffs[architecture]['LayerNorm'].append(values['mean_absolute_difference'])
+
+# アーキテクチャごとの平均絶対差を計算
+mean_architecture_diffs = {arch: {layer: np.mean(diffs) for layer, diffs in layers.items() if diffs}
+                            for arch, layers in architecture_mean_diffs.items()}
+
+# 可視化 (アーキテクチャごとの平均絶対差を線グラフで表示)
+plt.figure(figsize=(12, 6))
+
+# 各アーキテクチャのレイヤーごとの平均絶対差をプロット
+for arch, diffs in mean_architecture_diffs.items():
+    plt.plot(diffs.keys(), diffs.values(), marker='o', label=arch)
+
+plt.xlabel('Layer Type')
+plt.ylabel('Mean Absolute Difference')
+plt.title('Mean Absolute Differences Across Layer Types by Architecture')
+plt.legend(title='Architecture')
+plt.grid()
+plt.tight_layout()
+
+# グラフをファイルに保存 (PNG形式)
+plt.savefig("/home/s2410121/proj_LA/measure_similarities/gpt2/gpt2_layer_mean_abs_diff_by_architecture_lineplot.png")
+plt.close()

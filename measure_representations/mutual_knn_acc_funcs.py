@@ -13,7 +13,9 @@ def extract_representations(model, tokenizer, texts, layer_idx=-1) -> torch.Tens
     with torch.no_grad():
         outputs = model(**tokens)
         hidden_states = outputs.hidden_states  # List of layer-wise hidden states
+        print(hidden_states)
         representations = hidden_states[layer_idx]  # Extract the chosen layer
+        print(representations)
     # return representations.mean(dim=1)  # Mean-pooling across tokens
     return F.normalize(representations.mean(dim=1))
 
@@ -71,7 +73,7 @@ def get_texts_from_translation_corpus(n_samples, L2_iso_code, dataset="tatoeba")
         dataset = load_dataset("KarthikSaran/trans_en_ger", split="train")
     else:
         print("dataset is not defined!")
-    print(dataset[0])
+    # print(dataset[0])
     texts_en = [sample['translation']['en'] for sample in dataset.select(range(n_samples))]
     texts_L2 = [sample['translation'][L2_iso_code] for sample in dataset.select(range(n_samples))]
 

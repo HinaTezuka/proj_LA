@@ -48,7 +48,6 @@ state_dict_gpt2_ita = gpt2_model_ita.state_dict() # italian
 state_dict_gpt2_fre = gpt2_model_fre.state_dict() # french
 state_dict_gpt2_ko = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ko.state_dict()) # ko
 state_dict_gpt2_spa = gpt2_model_spa.state_dict() # spanish
-
 # ちゃんととれているか確認
 # state_dict_gpt2_original.keys()
 # state_dict_gpt2_ja.keys()

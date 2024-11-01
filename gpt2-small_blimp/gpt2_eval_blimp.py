@@ -8,12 +8,12 @@ import pandas as pd
 model_names = [
                 "gpt2", # base model: original gpt2(small) model : en
                 "rinna/japanese-gpt2-small", # ja
-                # "GroNLP/gpt2-small-dutch", # du
-                # "dbmdz/german-gpt2", # ger
-                # "GroNLP/gpt2-small-italian", # ita
-                # "dbddv01/gpt2-french-small", # fre
-                # "skt/kogpt2-base-v2", # ko
-                # "datificate/gpt2-small-spanish", # spa
+                "GroNLP/gpt2-small-dutch", # du
+                "dbmdz/german-gpt2", # ger
+                "GroNLP/gpt2-small-italian", # ita
+                "dbddv01/gpt2-french-small", # fre
+                "skt/kogpt2-base-v2", # ko
+                "datificate/gpt2-small-spanish", # spa
               ]
 
 # BLiMPの評価項目リスト
@@ -84,12 +84,8 @@ print(overall_accuracy)
 # 列名を変更してOVERALLにします
 overall_accuracy.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
-with open('gpt2_blimp_en_du.txt', 'w') as f:
-    f.write(df.to_string(index=False))  # DataFrameを文字列に変換して書き込む
 
-
-# print(df)
 # CSVに保存
-# df.to_csv("blimp_evaluation_results_complete2_gpt2_all.csv", index=False)
+df.to_csv("blimp_evaluation_results_complete2_gpt2_all.csv", index=False)
 
-# print("評価結果をcsv fileに保存しました。")
+print("評価結果をcsv fileに保存しました。")
