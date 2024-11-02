@@ -40,7 +40,10 @@ multiple_models_acc_comparison(data_gpt2_mo_ja, "gpt2", "gpt2_mo_ja")
 # print(data_gpt2_ALL)
 
 """ llama3 """
-
+file_path_llama3_ALL = "/home/s2410121/proj_LA/blimp_evaluation_results_complete2_llama3_all.csv"
+data_gpt2_llama3_ALL = pd.read_csv(file_path_llama3_ALL)
+acc_comparison(data_gpt2_llama3_ALL, "llama3", "llama3_ALL")
+multiple_models_acc_comparison(data_gpt2_llama3_ALL, "llama3", "llama3_ALL")
 """en_japanese"""
 # file_path_llama3_en_ja = "/home/s2410121/proj_LA/gpt2-small_blimp/csv_files/blimp_llama3_en_ja.csv"
 # data_llama3_en_ja = pd.read_csv(file_path_llama3_en_ja)
