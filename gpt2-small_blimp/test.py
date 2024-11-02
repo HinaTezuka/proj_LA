@@ -1,4 +1,4 @@
-""" over_allをみる """
+""" overallをみる """
 
 import pandas as pd
 
