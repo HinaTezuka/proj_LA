@@ -41,7 +41,7 @@ gpt2_model_spa = GPT2Model.from_pretrained(gpt2_model_spanish_name) # spa
 
 # parametersを取得 <- いくつかの辞書ではtransformerという接頭辞がついているため、記法を合わせるために削除(similarity_funcs.pyのdelete_transformer_prefixes_from_state_dict_keysを使用)
 state_dict_gpt2_original = gpt2_model_original.state_dict() # original(english)
-state_dict_gpt2_ja = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ja.state_dict()) # japanese
+state_dict_gpt2_ja = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ja.state_dict()) # # japanese
 state_dict_gpt2_du = gpt2_model_du.state_dict() # dutch
 state_dict_gpt2_ger = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ger.state_dict()) # german
 state_dict_gpt2_ita = gpt2_model_ita.state_dict() # italian
@@ -49,7 +49,7 @@ state_dict_gpt2_fre = gpt2_model_fre.state_dict() # french
 state_dict_gpt2_ko = delete_transformer_prefixes_from_state_dict_keys(gpt2_model_ko.state_dict()) # ko
 state_dict_gpt2_spa = gpt2_model_spa.state_dict() # spanish
 # ちゃんととれているか確認
-# state_dict_gpt2_original.keys()
+# print(state_dict_gpt2_original.keys())
 # state_dict_gpt2_ja.keys()
 # state_dict_gpt2_du.keys()
 # state_dict_gpt2_ger.keys()
@@ -115,4 +115,15 @@ weight_changes_gpt2_en_spa_computed = compare_between_models(weight_changes_gpt2
 weight_changes_gpt2['en_spa'] = weight_changes_gpt2_en_spa_computed
 
 # 一応ちゃんと取れているか確認　
-# print(weight_changes_gpt2)
+# print(weight_changes_gpt2.keys()) # dict_keys(['en_ja', 'en_du', 'en_ger', 'en_ita', 'en_fre', 'en_ko', 'en_spa'])
+# print("\n")
+# print("-----------------------------------------------------------------------")
+# print("\n")
+# print(weight_changes_gpt2.values())
+# print("\n")
+# print("-----------------------------------------------------------------------")
+# print("\n")
+# param_patterns = []
+# for k in weight_changes_gpt2['en_ja'].keys():
+#     param_patterns.append(k)
+# print(param_patterns)

@@ -6,8 +6,8 @@ memo:
 """
 
 import sys
-sys.path.append('..')
-from measure_similarities import similarity_funcs
+sys.path.append('/home/s2410121/proj_LA/measure_similarities')
+import similarity_funcs
 
 import torch
 import transformers
@@ -74,3 +74,5 @@ weight_changes_llama['en_ja'] = weight_changes_llama_en_ja_computed
 weight_changes_llama['en_ger'] = weight_changes_llama_en_ger_computed
 weight_changes_llama['en_ita'] = weight_changes_llama_en_ita_computed
 weight_changes_llama['en_ko'] = weight_changes_llama_en_ko_computed
+
+# print(weight_changes_llama['en_ja'].keys())
