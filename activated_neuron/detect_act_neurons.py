@@ -15,11 +15,12 @@ model_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 MODEL = 'llama3'
-
+# print(model.model.layers[0].mlp.act_fn)
+# sys.exit()
 def get_out_llama3(model, prompt, device, index):
     model.eval() # swith the model to evaluation mode (deactivate dropout, batch normalization)
     num_layers = model.config.num_hidden_layers  # nums of layers of the model
-    MLP_act = [f"model.layers.{i}.mlp" for i in range(num_layers)]  # generate path to MLP layer(of LLaMA-3)
+    MLP_act = [f"model.layers.{i}.mlp.act_fn" for i in range(num_layers)]  # generate path to MLP layer(of LLaMA-3)
 
     with torch.no_grad():
         # trace MLP layers using TraceDict
