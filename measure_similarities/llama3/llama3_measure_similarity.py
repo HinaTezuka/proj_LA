@@ -43,6 +43,13 @@ state_dict_llama_ja = llama_model_ja.state_dict() # japanese
 state_dict_llama_ger = llama_model_ger.state_dict() # german
 state_dict_llama_ita = llama_model_ita.state_dict() # italian
 state_dict_llama_ko = llama_model_ko.state_dict() # korean
+# print(f'en_ger: {state_dict_llama_original.keys() == state_dict_llama_ger.keys()}')
+# print(f'en_ja: {state_dict_llama_original.keys() == state_dict_llama_ja.keys()}')
+# print(f'en_ita: {state_dict_llama_original.keys() == state_dict_llama_ita.keys()}')
+# print(f'en_ko: {state_dict_llama_original.keys() == state_dict_llama_ko.keys()}')
+# print(f'en: {len(state_dict_llama_original.keys())}, ja: {len(state_dict_llama_ja.keys())}, ger: {len(state_dict_llama_ger.keys())}, ita: {len(state_dict_llama_ita.keys())}, ko: {len(state_dict_llama_ko.keys())}')
+# print(state_dict_llama_ger.keys())
+# sys.exit()
 
 # 重みの比較結果を保存する辞書
 weight_changes_llama = {} # 全体の結果の保存先

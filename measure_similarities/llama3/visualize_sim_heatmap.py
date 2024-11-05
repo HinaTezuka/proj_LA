@@ -53,9 +53,9 @@ def plot_heatmap(param_changes_per_arc, title="heatmap_gpt2", lang_pair="en_ja")
         for param_name in v.keys():
             data[param_name] = v[param_name]
     # layer_idx (vertical)
-    layer_idx = list(range(len(next(iter(data.values())))))
-    # layer_idx = list(range(12))
-    layer_idx = layer_idx[::-1]
+    # layer_idx = list(range(len(next(iter(data.values())))))
+    layer_idx = list(range(32))
+    # layer_idx = layer_idx[::-1]
     # df creation
     df = pd.DataFrame(data)
     # plot
