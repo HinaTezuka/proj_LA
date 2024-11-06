@@ -85,7 +85,7 @@ def track_neurons_with_text_data(model, tokenizer, data) -> dict: # data <- é€šå
             specific_neurons_L1.append((layer_idx, specific_neurons_L1_layer))
             # specific neurons for L2
             specific_neurons_L2_layer = np.intersect1d(activated_neurons_L2_layer, non_activated_neurons_L1_layer)
-            pecific_neurons_L2_layer = np.intersect1d(specific_neurons_L2_layer, shared_neurons_layer)
+            specific_neurons_L2_layer = np.intersect1d(specific_neurons_L2_layer, shared_neurons_layer)
             specific_neurons_L2.append((layer_idx, specific_neurons_L2_layer))
 
     output_dict = {
