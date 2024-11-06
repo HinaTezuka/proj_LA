@@ -11,7 +11,11 @@ from baukit import Trace, TraceDict
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig, AutoModel
 from datasets import load_dataset
 
-model_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1"
+# model_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1" # ja
+# model_name = "DiscoResearch/Llama3-German-8B" # ger
+# model_name = "ReBatch/Llama-3-8B-dutch" # du
+model_name = "DeepMount00/Llama-3-8b-Ita" # ita
+# model_name = "beomi/Llama-3-KoEn-8B" # ko
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 MODEL = 'llama3'
@@ -50,22 +54,38 @@ def act_llama3(input_ids):
 
 """ ニューロンの重なりを判定 """
 # Tatoebaデータを読み込む（ここでは例として固定のデータを使用）
-# tatoeba_data = [
-#     ("これはテストです。", "This is a test."),
-#     ("こんにちは。", "Hello."),
-#     ("さようなら。", "Goodbye."),
-#     ("お元気ですか？", "How are you?"),
-# ]
+tatoeba_data = [
+    # ("이것은 테스트입니다.", "This is a test."), # ko
+    # ("안녕하세요.", "Hello."),
+    # ("안녕히 가세요.", "Goodbye."),
+    # ("잘 지내세요?", "How are you?")
+    # ("これはテストです。", "This is a test."), # ja
+    # ("こんにちは。", "Hello."),
+    # ("さようなら。", "Goodbye."),
+    # ("お元気ですか？", "How are you?"),
+    # ("Dies ist ein Test.", "This is a test."), # ger
+    # ("Hallo.", "Hello."),
+    # ("Auf Wiedersehen.", "Goodbye."),
+    # ("Wie geht's?", "How are you?"),
+    # ("Dit is een test.", "This is a test."), # du
+    # ("Hallo.", "Hello."),
+    # ("Vaarwel.", "Goodbye."),
+    # ("Hoe gaat het?", "How are you?"),
+    ("Questo è un test.", "This is a test."), # ita
+    ("Ciao.", "Hello."),
+    ("Arrivederci.", "Goodbye."),
+    ("Come stai?", "How are you?"),
+]
 
 # Tatoebaデータセットのロード
 # Dataset({
 #     features: ['id', 'translation'],
 #     num_rows: 208866
 # })
-dataset = load_dataset("tatoeba", lang1="en", lang2="ja", split="train")
-print(dataset.features['translation'])
-# データセットから英語-日本語ペアを取得
-tatoeba_data = [(item['translation']['en'], item['translation']['ja']) for item in dataset]
+# dataset = load_dataset("tatoeba", lang1="en", lang2="ja", split="train")
+# print(dataset.features['translation'])
+# # データセットから英語-日本語ペアを取得
+# tatoeba_data = [(item['translation']['en'], item['translation']['ja']) for item in dataset]
 
 # 各言語に対する活性化ニューロンを追跡するリスト
 activated_neurons_japanese = []
@@ -149,5 +169,5 @@ plt.legend()
 plt.grid()
 # plt.show()
 
-plt.savefig('/home/s2410121/proj_LA/activated_neuron')
+plt.savefig('/home/s2410121/proj_LA/activated_neuron_en_ita')
 plt.close()
