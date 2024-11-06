@@ -12,18 +12,6 @@ from baukit import Trace, TraceDict
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig, AutoModel
 from datasets import load_dataset
 
-# from neuron_detection import *
-
-# model_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1" # ja
-# # model_name = "DiscoResearch/Llama3-German-8B" # ger
-# # model_name = "ReBatch/Llama-3-8B-dutch" # du
-# # model_name = "DeepMount00/Llama-3-8b-Ita" # ita
-# # model_name = "beomi/Llama-3-KoEn-8B" # ko
-# tokenizer = AutoTokenizer.from_pretrained(model_name)
-# model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
-# MODEL = 'llama3'
-# print(model.model.layers[0].mlp.act_fn)
-# sys.exit()
 def get_out_llama3(model, prompt, device, index):
     model.eval() # swith the model to evaluation mode (deactivate dropout, batch normalization)
     num_layers = model.config.num_hidden_layers  # nums of layers of the model
