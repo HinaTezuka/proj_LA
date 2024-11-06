@@ -1,6 +1,6 @@
 """
 detect activated neurons.
-some codes are citation from: https://github.com/weixuan-wang123/multilingual-neurons/blob/main/neuron-behavior.ipynb
+some codes are a citation from: https://github.com/weixuan-wang123/multilingual-neurons/blob/main/neuron-behavior.ipynb
 """
 import sys
 sys.path.append("/home/s2410121/proj_LA/activated_neuron")
