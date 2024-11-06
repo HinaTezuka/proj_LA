@@ -31,6 +31,28 @@ for L2, model_name in model_names.items():
     model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
 
     """ Tatoeba translation corpus """
+    # tatoeba_data = [
+    #     ("This is a test.", "이것은 테스트입니다."),  # ko
+    #     ("Hello.", "안녕하세요."),
+    #     ("Goodbye.", "안녕히 가세요."),
+    #     ("How are you?", "잘 지내세요?"),
+    #     ("This is a test.", "これはテストです。"),  # ja
+    #     ("Hello.", "こんにちは。"),
+    #     ("Goodbye.", "さようなら。"),
+    #     ("How are you?", "お元気ですか？"),
+    #     ("This is a test.", "Dies ist ein Test."),  # ger
+    #     ("Hello.", "Hallo."),
+    #     ("Goodbye.", "Auf Wiedersehen."),
+    #     ("How are you?", "Wie geht's?"),
+    #     ("This is a test.", "Dit is een test."),  # du
+    #     ("Hello.", "Hallo."),
+    #     ("Goodbye.", "Vaarwel."),
+    #     ("How are you?", "Hoe gaat het?"),
+    #     ("This is a test.", "Questo è un test."),  # ita
+    #     ("Hello.", "Ciao."),
+    #     ("Goodbye.", "Arrivederci."),
+    #     ("How are you?", "Come stai?"),
+    # ]
     # Dataset({
     #     features: ['id', 'translation'],
     #     num_rows: 208866
@@ -43,6 +65,10 @@ for L2, model_name in model_names.items():
 
     """ tracking neurons """
     neuron_detection_dict = neuron_detection_funcs.track_neurons_with_text_data(model, tokenizer, tatoeba_data)
+
+    # cacheの削除
+    # del model
+    # torch.cuda.empty_cache()
 
     activated_neurons_L1 = neuron_detection_dict["activated_neurons_L1"]
     activated_neurons_L2 = neuron_detection_dict["activated_neurons_L2"]
@@ -70,7 +96,7 @@ for L2, model_name in model_names.items():
 
 if __name__ == "__main__":
 
-    # for layer_idx, neurons in shared_neurons:
+    # for layer_idx, neurons in activated_neurons_L1:
     #     print(f"Layer {layer_idx}: Shared Neurons: {neurons}")
     print(f'len_of_nonactivated_neurons_L2: {len(non_activated_neurons_L2)}, len_of_non_activated_neurons_L1: {len(non_activated_neurons_L1)}')
-    print(f'non_activated_neurons_all: {len(non_activated_neurons_all)}')
+    print(f'non_activated_neurons_all: {non_activated_neurons_all}')

@@ -26,9 +26,9 @@ def get_out_llama3(model, prompt, device, index):
 
 def act_llama3(model, input_ids):
     mlp_act = get_out_llama3(model, input_ids, model.device, -1)  # LlamaのMLP活性化を取得
-    mlp_act_tensors = [act.to("cpu") for act in mlp_act] # Numpy配列はCPUでしか動かないので、各テンソルをCPU上へ移動
+    mlp_act = [act.to("cpu") for act in mlp_act] # Numpy配列はCPUでしか動かないので、各テンソルをCPU上へ移動
     # mlp_act = np.array(mlp_act)  # convert to numpy array
-    mlp_act_np = [act.detach().numpy() for act in mlp_act_tensors]
+    # mlp_act_np = [act.detach().numpy() for act in mlp_act_tensors]
     return mlp_act
 
 def track_neurons_with_text_data(model, tokenizer, data) -> dict: # data <- 通常はtatoeba
@@ -51,6 +51,9 @@ def track_neurons_with_text_data(model, tokenizer, data) -> dict: # data <- 通�
         input_ids_L2 = tokenizer(L2_text, return_tensors="pt").input_ids.to("cuda")
         mlp_activation_L2 = act_llama3(model, input_ids_L2)
 
+        # print(f'mlp_activation_L1[0]_len: {len(mlp_activation_L1[0])}')
+        # sys.exit()
+
         """ aggregate each type of neurons per each layer """
         for layer_idx in range(len(mlp_activation_L2)):
 
@@ -69,6 +72,8 @@ def track_neurons_with_text_data(model, tokenizer, data) -> dict: # data <- 通�
             # non-activated neurons for L2
             non_activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] <= 0).cpu().numpy()
             non_activated_neurons_L2.append((layer_idx, non_activated_neurons_L2_layer))
+            # print(non_activated_neurons_L2)
+            # sys.exit()
             # non-activated_neurons for both L1 and L2
             non_activated_neurons_both_L1_L2_layer = np.intersect1d(non_activated_neurons_L1_layer, non_activated_neurons_L2_layer)
             non_activated_neurons_all.append((layer_idx, non_activated_neurons_both_L1_L2_layer))
@@ -82,7 +87,10 @@ def track_neurons_with_text_data(model, tokenizer, data) -> dict: # data <- 通�
             # specific neurons for L1
             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer, non_activated_neurons_L2_layer)
             specific_neurons_L1_layer = np.intersect1d(specific_neurons_L1_layer, shared_neurons_layer)
+            # specific_neurons_L1_layer = np.intersect1d(specific_neurons_L1_layer, non_activated_neurons_both_L1_L2_layer)
             specific_neurons_L1.append((layer_idx, specific_neurons_L1_layer))
+            print(specific_neurons_L1)
+            # sys.exit()
             # specific neurons for L2
             specific_neurons_L2_layer = np.intersect1d(activated_neurons_L2_layer, non_activated_neurons_L1_layer)
             specific_neurons_L2_layer = np.intersect1d(specific_neurons_L2_layer, shared_neurons_layer)
