@@ -100,6 +100,3 @@ def track_neurons_with_text_data(model, tokenizer, data) -> dict: # data <- é€šå
     }
 
     return output_dict
-
-
-# if __name__ == "__main__":
