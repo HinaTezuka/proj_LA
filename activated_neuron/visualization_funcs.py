@@ -5,7 +5,7 @@ sys.path.append("/home/s2410121/proj_LA/activated_neuron/shared_neurons.py")
 
 import matplotlib.pyplot as plt
 
-nums_of_neurons_llama3 = 14336 # all neurons of LLaMA-3-8B(inside MLP)
+nums_of_neurons_llama3 = 14336 # nums of all neurons (LLaMA-3-8B: MLP)
 
 def visualize_neurons_with_line_plot(
                                     L1,
@@ -17,12 +17,13 @@ def visualize_neurons_with_line_plot(
                                     shared_neurons,
                                     specific_neurons_L1,
                                     specific_neurons_L2,
-                                    non_activated_neurons_all
+                                    non_activated_neurons_all,
+                                    folder: str,
                                     ):
-    # 層の数
+    # nums of all layers(LLaMA-3-8B)
     num_layers = 32
 
-    # 各層のニューロンの活性化を集計するためのリスト
+    # list for aggregating all types of neurons
     L2_counts = [0] * num_layers
     L1_counts = [0] * num_layers
     shared_counts = [0] * num_layers
@@ -32,31 +33,31 @@ def visualize_neurons_with_line_plot(
     non_activated_L1_counts = [0] * num_layers  # 英語の非活性化ニューロン
     non_activated_all_counts = [0] * num_layers  # 両言語の非活性化共通ニューロン
 
-    # 各層におけるニューロンの活性化数をカウント
+    # counting activate/non-activate counts
     for layer_idx in range(num_layers):
         # activated_neurons_L1 と activated_neurons_L2 から、各層のユニークなニューロン数を取得
         L1_neurons_set = set(activated_neurons_L1[layer_idx][1][:, 2])  # 第3列がニューロンインデックス
         L2_neurons_set = set(activated_neurons_L2[layer_idx][1][:, 2])
 
-        L2_counts[layer_idx] = len(L2_neurons_set)  # 日本語のニューロン数
-        L1_counts[layer_idx] = len(L1_neurons_set)  # 英語のニューロン数
-        shared_counts[layer_idx] = len(set(shared_neurons[layer_idx][1].flatten()))  # 共有ニューロン数
-        specific_L2_counts[layer_idx] = len(set(specific_neurons_L2[layer_idx][1].flatten()))  # 日本語特有のニューロン数
-        specific_L1_counts[layer_idx] = len(set(specific_neurons_L1[layer_idx][1].flatten()))  # 英語特有のニューロン数
-        non_activated_L2_counts[layer_idx] = len(set(non_activated_neurons_L2[layer_idx][1].flatten()))  # 日本語の非活性化ニューロン数
-        non_activated_L1_counts[layer_idx] = len(set(non_activated_neurons_L1[layer_idx][1].flatten()))  # 英語の非活性化ニューロン数
-        non_activated_all_counts[layer_idx] = len(set(non_activated_neurons_all[layer_idx][1].flatten()))  # 両言語の非活性化共通ニューロン数
+        L2_counts[layer_idx] = len(L2_neurons_set)  # nums for ja neurons
+        L1_counts[layer_idx] = len(L1_neurons_set)  # nums for en neurons
+        shared_counts[layer_idx] = len(set(shared_neurons[layer_idx][1].flatten()))  # shared_neurons
+        specific_L2_counts[layer_idx] = len(set(specific_neurons_L2[layer_idx][1].flatten()))  # specific neurons for ja
+        specific_L1_counts[layer_idx] = len(set(specific_neurons_L1[layer_idx][1].flatten()))  # specific neurons for en
+        # non_activated_L2_counts[layer_idx] = len(set(non_activated_neurons_L2[layer_idx][1].flatten()))  # non-activate ja
+        # non_activated_L1_counts[layer_idx] = len(set(non_activated_neurons_L1[layer_idx][1].flatten()))  # non-activate en
+        # non_activated_all_counts[layer_idx] = len(set(non_activated_neurons_all[layer_idx][1].flatten()))  # non-activate for both
 
-    # プロット
+    # plot
     plt.figure(figsize=(15, 10))
     plt.plot(range(num_layers), L2_counts, label=f'{L2} Activated Neurons', marker='o')
     plt.plot(range(num_layers), L1_counts, label=f'{L1} Activated Neurons', marker='o')
     plt.plot(range(num_layers), shared_counts, label='Shared Neurons', marker='o', linewidth=6)
     plt.plot(range(num_layers), specific_L2_counts, label=f'Specific to {L2}', marker='o')
     plt.plot(range(num_layers), specific_L1_counts, label=f'Specific to {L1}', marker='o')
-    plt.plot(range(num_layers), non_activated_L2_counts, label=f'Non-Activated {L2} Neurons', marker='x', linestyle='--')
-    plt.plot(range(num_layers), non_activated_L1_counts, label=f'Non-Activated {L1} Neurons', marker='x', linestyle='--')
-    plt.plot(range(num_layers), non_activated_all_counts, label='Non-Activated Neurons (Both)', marker='s', linestyle='-.')
+    # plt.plot(range(num_layers), non_activated_L2_counts, label=f'Non-Activated {L2} Neurons', marker='x', linestyle='--')
+    # plt.plot(range(num_layers), non_activated_L1_counts, label=f'Non-Activated {L1} Neurons', marker='x', linestyle='--')
+    # plt.plot(range(num_layers), non_activated_all_counts, label='Non-Activated Neurons (Both)', marker='s', linestyle='-.')
 
     plt.title(f'Neuron Activation Counts per Layer ({L1} and {L2})')
     plt.xlabel('Layer Index')
@@ -66,7 +67,7 @@ def visualize_neurons_with_line_plot(
     plt.grid()
 
     # グラフの保存
-    plt.savefig(f'/home/s2410121/proj_LA/activated_neuron/images/activated_neuron_{L1}_{L2}.png')
+    plt.savefig(f'/home/s2410121/proj_LA/activated_neuron/images/{folder}/activated_neuron_{L1}_{L2}.png')
     plt.close()
 
 def visualize_neurons_with_line_plot_with_percent(
@@ -79,12 +80,13 @@ def visualize_neurons_with_line_plot_with_percent(
                                     shared_neurons,
                                     specific_neurons_L1,
                                     specific_neurons_L2,
-                                    non_activated_neurons_all
+                                    non_activated_neurons_all,
+                                    folder: str,
                                     ):
-    # 層の数
+    # nums of layers
     num_layers = 32
 
-    # 各層のニューロンの活性化を集計するためのリスト（絶対数ではなく%で計算）
+    # list for aggregating all types of neurons （with %）
     L2_counts = [0] * num_layers
     L1_counts = [0] * num_layers
     shared_counts = [0] * num_layers
@@ -94,7 +96,7 @@ def visualize_neurons_with_line_plot_with_percent(
     non_activated_L1_counts = [0] * num_layers  # 英語の非活性化ニューロン
     non_activated_all_counts = [0] * num_layers  # 両言語の非活性化共通ニューロン
 
-    # 各層におけるニューロンの活性化数を計算
+    # count activated/non-activated neurons per each layer
     for layer_idx in range(num_layers):
         # activated_neurons_L1 と activated_neurons_L2 から、各層のユニークなニューロン数を取得
         L1_neurons_set = set(activated_neurons_L1[layer_idx][1][:, 2])  # 第3列がニューロンインデックス
@@ -105,20 +107,20 @@ def visualize_neurons_with_line_plot_with_percent(
         shared_counts[layer_idx] = len(set(shared_neurons[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 共有ニューロン数の割合
         specific_L2_counts[layer_idx] = len(set(specific_neurons_L2[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 日本語特有のニューロン数の割合
         specific_L1_counts[layer_idx] = len(set(specific_neurons_L1[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 英語特有のニューロン数の割合
-        non_activated_L2_counts[layer_idx] = len(set(non_activated_neurons_L2[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 日本語の非活性化ニューロン数の割合
-        non_activated_L1_counts[layer_idx] = len(set(non_activated_neurons_L1[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 英語の非活性化ニューロン数の割合
-        non_activated_all_counts[layer_idx] = len(set(non_activated_neurons_all[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 両言語の非活性化共通ニューロン数の割合
+        # non_activated_L2_counts[layer_idx] = len(set(non_activated_neurons_L2[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 日本語の非活性化ニューロン数の割合
+        # non_activated_L1_counts[layer_idx] = len(set(non_activated_neurons_L1[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 英語の非活性化ニューロン数の割合
+        # non_activated_all_counts[layer_idx] = len(set(non_activated_neurons_all[layer_idx][1].flatten())) / nums_of_neurons_llama3 * 100  # 両言語の非活性化共通ニューロン数の割合
 
-    # プロット
+    # plot
     plt.figure(figsize=(15, 10))
     plt.plot(range(num_layers), L2_counts, label=f'{L2} Activated Neurons (%)', marker='o')
     plt.plot(range(num_layers), L1_counts, label=f'{L1} Activated Neurons (%)', marker='o')
     plt.plot(range(num_layers), shared_counts, label='Shared Neurons (%)', marker='o', linewidth=6)
     plt.plot(range(num_layers), specific_L2_counts, label=f'Specific to {L2} (%)', marker='o')
     plt.plot(range(num_layers), specific_L1_counts, label=f'Specific to {L1} (%)', marker='o')
-    plt.plot(range(num_layers), non_activated_L2_counts, label=f'Non-Activated {L2} Neurons (%)', marker='x', linestyle='--')
-    plt.plot(range(num_layers), non_activated_L1_counts, label=f'Non-Activated {L1} Neurons (%)', marker='x', linestyle='--')
-    plt.plot(range(num_layers), non_activated_all_counts, label='Non-Activated Neurons (Both) (%)', marker='s', linestyle='-.')
+    # plt.plot(range(num_layers), non_activated_L2_counts, label=f'Non-Activated {L2} Neurons (%)', marker='x', linestyle='--')
+    # plt.plot(range(num_layers), non_activated_L1_counts, label=f'Non-Activated {L1} Neurons (%)', marker='x', linestyle='--')
+    # plt.plot(range(num_layers), non_activated_all_counts, label='Non-Activated Neurons (Both) (%)', marker='s', linestyle='-.')
 
     plt.title(f'Neuron Activation Percentages per Layer ({L1} and {L2})')
     plt.xlabel('Layer Index')
@@ -127,8 +129,8 @@ def visualize_neurons_with_line_plot_with_percent(
     plt.legend()
     plt.grid()
 
-    # グラフの保存
-    plt.savefig(f'/home/s2410121/proj_LA/activated_neuron/images/activated_neuron_{L1}_{L2}_percentage.png')
+    # save figures
+    plt.savefig(f'/home/s2410121/proj_LA/activated_neuron/images/{folder}/activated_neuron_{L1}_{L2}_percentage.png')
     plt.close()
 
 # def visualize_neurons_with_line_plot_with_subplots(
@@ -203,4 +205,4 @@ def visualize_neurons_with_line_plot_with_percent(
 
 if __name__ == "__main__":
     # visualize_neurons_with_line_plot(L1, "ja")
-    print("visualization completed ! ")
+    print("visualization completed !")
