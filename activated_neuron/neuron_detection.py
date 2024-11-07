@@ -17,11 +17,11 @@ import visualization_funcs
 """ models """
 # LLaMA-3
 model_names = {
-    "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1",
-    "ger": "DiscoResearch/Llama3-German-8B",
-    "du": "ReBatch/Llama-3-8B-dutch",
-    "ita": "DeepMount00/Llama-3-8b-Ita",
-    "ko": "beomi/Llama-3-KoEn-8B",
+    "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
+    "de": "DiscoResearch/Llama3-German-8B", # ger
+    "nl": "ReBatch/Llama-3-8B-dutch", # du
+    "it": "DeepMount00/Llama-3-8b-Ita", # ita
+    "ko": "beomi/Llama-3-KoEn-8B", # ko
 }
 
 L1 = "en" # L1 is fixed to english.
@@ -58,8 +58,8 @@ for L2, model_name in model_names.items():
     #     num_rows: 208866
     # })
     dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")
-    # select first 500 sentences
-    dataset = dataset.select(range(500))
+    # select first 100 sentences
+    dataset = dataset.select(range(100))
     tatoeba_data = [(item['translation'][L1], item['translation'][L2]) for item in dataset]
     tatoeba_data_len = len(tatoeba_data)
 
