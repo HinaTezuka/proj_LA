@@ -14,11 +14,11 @@ model_names = {
     # "base": "gpt2",
     "ja": "rinna/japanese-gpt2-small", # ja
     # "de": "ml6team/gpt2-small-german-finetune-oscar", # ger
-    "nl": "GroNLP/gpt2-small-dutch", # du
-    "it": "GroNLP/gpt2-small-italian", # ita
-    "fr": "dbddv01/gpt2-french-small", # fre
-    "ko": "skt/kogpt2-base-v2", # ko
-    "es": "datificate/gpt2-small-spanish" # spa
+    # "nl": "GroNLP/gpt2-small-dutch", # du
+    # "it": "GroNLP/gpt2-small-italian", # ita
+    # "fr": "dbddv01/gpt2-french-small", # fre
+    # "ko": "skt/kogpt2-base-v2", # ko
+    # "es": "datificate/gpt2-small-spanish" # spa
 }
 
 L1 = "en" # L1 is fixed to english
@@ -39,7 +39,7 @@ for L2, model_name in model_names.items():
     tatoeba_data = [(item['translation'][L1], item['translation'][L2]) for item in dataset]
     tatoeba_data_len = len(tatoeba_data)
 
-    neuron_detection_dict = track_neurons_with_text_data(model, tokenizer, tatoeba_data, 0.5)
+    neuron_detection_dict = track_neurons_with_text_data(model, tokenizer, tatoeba_data)
 
     activated_neurons_L1 = neuron_detection_dict["activated_neurons_L1"]
     activated_neurons_L2 = neuron_detection_dict["activated_neurons_L2"]

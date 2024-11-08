@@ -93,6 +93,7 @@ def track_neurons_with_text_data(model, tokenizer, data, active_THRESHOLD=0, non
 
             """ activated neurons """
             # activated neurons for L1
+            # torch.nonzero return index, not actual activation values
             activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] > active_THRESHOLD).cpu().numpy()
             # remove activation to 0-th token (for gpt2, it's <|begin_of_text|>)
             activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] != 0]
