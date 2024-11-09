@@ -8,18 +8,40 @@ import pandas as pd
 model_names = [
                 "gpt2", # base model: original gpt2(small) model : en
                 "rinna/japanese-gpt2-small", # ja
-                "GroNLP/gpt2-small-dutch", # du
-                "dbmdz/german-gpt2", # ger
-                "GroNLP/gpt2-small-italian", # ita
-                "dbddv01/gpt2-french-small", # fre
-                "skt/kogpt2-base-v2", # ko
-                "datificate/gpt2-small-spanish", # spa
+                # "GroNLP/gpt2-small-dutch", # du
+                # "dbmdz/german-gpt2", # ger
+                # "GroNLP/gpt2-small-italian", # ita
+                # "dbddv01/gpt2-french-small", # fre
+                # "skt/kogpt2-base-v2", # ko
+                # "datificate/gpt2-small-spanish", # spa
               ]
 
 # BLiMPの評価項目リスト
 configs = get_dataset_config_names("blimp")
 
 # 評価関数
+# def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
+#     inputs1 = tokenizer(sentence1, return_tensors="pt")
+#     inputs2 = tokenizer(sentence2, return_tensors="pt")
+
+#     with torch.no_grad():
+#         outputs1 = model(**inputs1)
+#         outputs2 = model(**inputs2)
+
+#     """ モデルがそれぞれの文を生成する確率 """
+#     # score1 = outputs1.logits.log_softmax(dim=-1)[..., inputs1.input_ids[0]].sum()
+#     # score2 = outputs2.logits.log_softmax(dim=-1)[..., inputs2.input_ids[0]].sum()
+
+#     # 文1の対数確率をトークンごとに取得して平均
+#     log_probs1 = outputs1.logits.log_softmax(dim=-1)
+#     score1 = log_probs1[..., inputs1.input_ids[0]].mean()
+
+#     # 文2の対数確率をトークンごとに取得して平均
+#     log_probs2 = outputs2.logits.log_softmax(dim=-1)
+#     score2 = log_probs2[..., inputs2.input_ids[0]].mean()
+
+#     return score1, score2
+
 def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
     inputs1 = tokenizer(sentence1, return_tensors="pt")
     inputs2 = tokenizer(sentence2, return_tensors="pt")
@@ -28,17 +50,21 @@ def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
         outputs1 = model(**inputs1)
         outputs2 = model(**inputs2)
 
-    """ モデルがそれぞれの文を生成する確率 """
-    # score1 = outputs1.logits.log_softmax(dim=-1)[..., inputs1.input_ids[0]].sum()
-    # score2 = outputs2.logits.log_softmax(dim=-1)[..., inputs2.input_ids[0]].sum()
-
     # 文1の対数確率をトークンごとに取得して平均
     log_probs1 = outputs1.logits.log_softmax(dim=-1)
-    score1 = log_probs1[..., inputs1.input_ids[0]].mean()
+    score1 = 0.0
+    for i in range(inputs1.input_ids.size(1) - 1):
+        target_token_id = inputs1.input_ids[0, i + 1]
+        score1 += log_probs1[0, i, target_token_id].item()
+    score1 /= (inputs1.input_ids.size(1) - 1)  # 平均を取る
 
     # 文2の対数確率をトークンごとに取得して平均
     log_probs2 = outputs2.logits.log_softmax(dim=-1)
-    score2 = log_probs2[..., inputs2.input_ids[0]].mean()
+    score2 = 0.0
+    for i in range(inputs2.input_ids.size(1) - 1):
+        target_token_id = inputs2.input_ids[0, i + 1]
+        score2 += log_probs2[0, i, target_token_id].item()
+    score2 /= (inputs2.input_ids.size(1) - 1)  # 平均を取る
 
     return score1, score2
 
@@ -86,6 +112,6 @@ overall_accuracy.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
 
 # CSVに保存
-df.to_csv("blimp_evaluation_results_complete2_gpt2_all.csv", index=False)
+df.to_csv("blimp_evaluation_results_complete2_gpt2_all_final_en_ja.csv", index=False)
 
 print("評価結果をcsv fileに保存しました。")

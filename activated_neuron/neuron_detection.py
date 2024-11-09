@@ -33,23 +33,25 @@ for L2, model_name in model_names.items():
     # model = AutoModelForCausalLM.from_pretrained(model_name)
 
     """ tatoeba translation corpus """
-    # Dataset({
-    #     features: ['id', 'translation'],
-    #     num_rows: 208866
-    # })
     dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")
     # select first 100 sentences
-    dataset = dataset.select(range(100))
+    # dataset = dataset.select(range(500))
     tatoeba_data = [(item['translation'][L1], item['translation'][L2]) for item in dataset]
     tatoeba_data_len = len(tatoeba_data)
 
+    """ baseとして、対訳関係のない1文ずつのペアを作成(tatoebaの最後の1, 2文が対象) """
+    tatoeba_data_base = [(dataset["translation"][-100][L1], dataset["translation"][-101][L2])]
+    # print(tatoeba_data)
+    # sys.exit()
+
     """ tracking neurons """
     neuron_detection_dict = neuron_detection_funcs.track_neurons_with_text_data(model, tokenizer, tatoeba_data, 0, 0)
+    neuron_detection_base_dict = neuron_detection_funcs.track_neurons_with_text_data(model, tokenizer, tatoeba_data_base, 0, 0)
 
     # delete some cache
     # del model
     # torch.cuda.empty_cache()
-
+    """ main """
     activated_neurons_L1 = neuron_detection_dict["activated_neurons_L1"]
     activated_neurons_L2 = neuron_detection_dict["activated_neurons_L2"]
     non_activated_neurons_L1 = neuron_detection_dict["non_activated_neurons_L1"]
@@ -58,22 +60,33 @@ for L2, model_name in model_names.items():
     specific_neurons_L1 = neuron_detection_dict["specific_neurons_L1"]
     specific_neurons_L2 = neuron_detection_dict["specific_neurons_L2"]
     non_activated_neurons_all = neuron_detection_dict["non_activated_neurons_all"]
-    # print(activated_neurons_L1)
-    # sys.exit()
+
+    """ for base line """
+    activated_neurons_L1_base = neuron_detection_base_dict["activated_neurons_L1"]
+    activated_neurons_L2_base = neuron_detection_base_dict["activated_neurons_L2"]
+    non_activated_neurons_L1_base = neuron_detection_base_dict["non_activated_neurons_L1"]
+    non_activated_neurons_L2_base = neuron_detection_base_dict["non_activated_neurons_L2"]
+    shared_neurons_base = neuron_detection_base_dict["shared_neurons"]
+    specific_neurons_L1_base = neuron_detection_base_dict["specific_neurons_L1"]
+    specific_neurons_L2_base = neuron_detection_base_dict["specific_neurons_L2"]
+    non_activated_neurons_all_base = neuron_detection_base_dict["non_activated_neurons_all"]
 
     """ visualization """
     visualization_funcs.visualize_neurons_with_line_plot(
-                                                        L1,
-                                                        L2,
-                                                        activated_neurons_L1,
-                                                        activated_neurons_L2,
-                                                        non_activated_neurons_L1,
-                                                        non_activated_neurons_L2,
-                                                        shared_neurons,
-                                                        specific_neurons_L1,
-                                                        specific_neurons_L2,
-                                                        non_activated_neurons_all,
-                                                        "tatoeba"
+                                                            L1,
+                                                            L2,
+                                                            # main
+                                                            activated_neurons_L1,
+                                                            activated_neurons_L2,
+                                                            non_activated_neurons_L1,
+                                                            non_activated_neurons_L2,
+                                                            shared_neurons,
+                                                            specific_neurons_L1,
+                                                            specific_neurons_L2,
+                                                            non_activated_neurons_all,
+                                                            "only_1s",
+                                                            # base line
+                                                            shared_neurons_base,
                                                         )
 
 # if __name__ == "__main__":

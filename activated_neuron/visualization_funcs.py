@@ -10,6 +10,7 @@ nums_of_neurons_llama3 = 14336 # nums of all neurons (LLaMA-3-8B: MLP)
 def visualize_neurons_with_line_plot(
                                     L1,
                                     L2,
+                                    # main
                                     activated_neurons_L1,
                                     activated_neurons_L2,
                                     non_activated_neurons_L1,
@@ -19,11 +20,14 @@ def visualize_neurons_with_line_plot(
                                     specific_neurons_L2,
                                     non_activated_neurons_all,
                                     folder: str,
+                                    # base
+                                    shared_neurons_base,
                                     ):
     # nums of all layers(LLaMA-3-8B)
     num_layers = 32
 
     # list for aggregating all types of neurons
+    """ main """
     L2_counts = [0] * num_layers
     L1_counts = [0] * num_layers
     shared_counts = [0] * num_layers
@@ -32,6 +36,8 @@ def visualize_neurons_with_line_plot(
     non_activated_L2_counts = [0] * num_layers  # 日本語の非活性化ニューロン
     non_activated_L1_counts = [0] * num_layers  # 英語の非活性化ニューロン
     non_activated_all_counts = [0] * num_layers  # 両言語の非活性化共通ニューロン
+    """ base line """
+    shared_counts_base = [0] * num_layers
 
     # counting activate/non-activate counts
     for layer_idx in range(num_layers):
@@ -47,6 +53,8 @@ def visualize_neurons_with_line_plot(
         # non_activated_L2_counts[layer_idx] = len(set(non_activated_neurons_L2[layer_idx][1].flatten()))  # non-activate ja
         # non_activated_L1_counts[layer_idx] = len(set(non_activated_neurons_L1[layer_idx][1].flatten()))  # non-activate en
         # non_activated_all_counts[layer_idx] = len(set(non_activated_neurons_all[layer_idx][1].flatten()))  # non-activate for both
+        """ base line """
+        shared_counts_base[layer_idx] = len(set(shared_neurons_base[layer_idx][1].flatten()))  # shared_neurons
 
     # plot
     plt.figure(figsize=(15, 10))
@@ -58,6 +66,8 @@ def visualize_neurons_with_line_plot(
     # plt.plot(range(num_layers), non_activated_L2_counts, label=f'Non-Activated {L2} Neurons', marker='x', linestyle='--')
     # plt.plot(range(num_layers), non_activated_L1_counts, label=f'Non-Activated {L1} Neurons', marker='x', linestyle='--')
     # plt.plot(range(num_layers), non_activated_all_counts, label='Non-Activated Neurons (Both)', marker='s', linestyle='-.')
+    # base line
+    plt.plot(range(num_layers), shared_counts_base, label='Shared Neurons(base)', marker='x', linestyle='-.')
 
     plt.title(f'Neuron Activation Counts per Layer ({L1} and {L2})')
     plt.xlabel('Layer Index')
