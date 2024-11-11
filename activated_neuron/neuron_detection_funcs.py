@@ -183,31 +183,43 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
     for L1_text, L2_text in data:
         # L1 text
         input_ids_L1 = tokenizer(L1_text, return_tensors="pt").input_ids.to("cuda")
+        # print(tokenizer.decode(input_ids_L1[0][-1]))
+        token_len_L1 = len(input_ids_L1[0])
         mlp_activation_L1 = act_llama3(model, input_ids_L1)
         # L2 text
         input_ids_L2 = tokenizer(L2_text, return_tensors="pt").input_ids.to("cuda")
+        token_len_L2 = len(input_ids_L2[0])
         mlp_activation_L2 = act_llama3(model, input_ids_L2)
 
         for layer_idx in range(len(mlp_activation_L2)):
             # Activated neurons for L1 and L2
             activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] > active_THRESHOLD).cpu().numpy()
-            activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] != 0]
+            # 最初の文頭トークンをカウントしない
+            # activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] != 0]
+            # 最後のトークンだけ考慮する
+            activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
             activated_neurons_L1.append((layer_idx, activated_neurons_L1_layer))
             activated_neurons_L1_vis[layer_idx].update(np.unique(activated_neurons_L1_layer[:, 2]))
 
             activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] > active_THRESHOLD).cpu().numpy()
-            activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] != 0]
+            # activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] != 0]
+            # 最後のトークンだけ考慮する
+            activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
             activated_neurons_L2.append((layer_idx, activated_neurons_L2_layer))
             activated_neurons_L2_vis[layer_idx].update(np.unique(activated_neurons_L2_layer[:, 2]))
 
             # Non-activated neurons for L1 and L2
             non_activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
-            non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] != 0]
+            # non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] != 0]
+            # 最後のトークンだけ考慮する
+            non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
             non_activated_neurons_L1.append((layer_idx, non_activated_neurons_L1_layer))
             non_activated_neurons_L1_vis[layer_idx].update(np.unique(non_activated_neurons_L1_layer[:, 2]))
 
             non_activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
-            non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] != 0]
+            # non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] != 0]
+            # 最後のトークンだけ考慮する
+            non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
             non_activated_neurons_L2.append((layer_idx, non_activated_neurons_L2_layer))
             non_activated_neurons_L2_vis[layer_idx].update(np.unique(non_activated_neurons_L2_layer[:, 2]))
 

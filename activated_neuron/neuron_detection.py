@@ -16,12 +16,12 @@ from visualization_funcs import visualize_neurons_with_line_plot, visualize_neur
 """ models """
 # LLaMA-3
 model_names = {
-    # "base": "meta-llama/Meta-Llama-3-8B"
+    # "base": "meta-llama/Meta-Llama-3-8B",
     "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
     # "de": "DiscoResearch/Llama3-German-8B", # ger
-    # "nl": "ReBatch/Llama-3-8B-dutch", # du
-    # "it": "DeepMount00/Llama-3-8b-Ita", # ita
-    # "ko": "beomi/Llama-3-KoEn-8B", # ko
+    "nl": "ReBatch/Llama-3-8B-dutch", # du
+    "it": "DeepMount00/Llama-3-8b-Ita", # ita
+    "ko": "beomi/Llama-3-KoEn-8B", # ko
 }
 
 L1 = "en" # L1 is fixed to english.
@@ -34,7 +34,7 @@ for L2, model_name in model_names.items():
     """ tatoeba translation corpus """
     dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")
     # select first 100 sentences
-    num_sentences = 10
+    num_sentences = 2000
     dataset = dataset.select(range(num_sentences))
     tatoeba_data = []
     for item in dataset:
@@ -50,8 +50,8 @@ for L2, model_name in model_names.items():
     print(tatoeba_data_base)
 
     """ tracking neurons """
-    neuron_detection_dict, neuron_detection_dict_vis = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0, 0)
-    neuron_detection_base_dict, neuron_detection_base_dict_vis = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data_base, 0, 0)
+    neuron_detection_dict, neuron_detection_dict_vis = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0.1, 0)
+    neuron_detection_base_dict, neuron_detection_base_dict_vis = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data_base, 0.1, 0)
     # print(len(neuron_detection_base_dict["shared_neurons"]))
     # print(len(neuron_detection_dict["shared_neurons"]))
     # sys.exit()
@@ -111,11 +111,11 @@ for L2, model_name in model_names.items():
                                         specific_neurons_L1_vis,
                                         specific_neurons_L2_vis,
                                         non_activated_neurons_all_vis,
-                                        "tatoeba",
+                                        "tatoeba_0.1_th",
                                         # base line
                                         shared_neurons_base_vis,
                                     )
-    print('comp')
+
     # visualize_neurons_with_line_plot(
     #                                     L1,
     #                                     L2,
@@ -133,20 +133,20 @@ for L2, model_name in model_names.items():
     #                                     shared_neurons_base,
     #                                 )
 
-    visualize_neurons_with_line_plot_b(
-                                        L1,
-                                        L2,
-                                        # base line
-                                        activated_neurons_L1_base,
-                                        activated_neurons_L2_base,
-                                        non_activated_neurons_L1_base,
-                                        non_activated_neurons_L2_base,
-                                        shared_neurons_base,
-                                        specific_neurons_L1_base,
-                                        specific_neurons_L2_base,
-                                        non_activated_neurons_all_base,
-                                        "only_1s"
-                                    )
+    # visualize_neurons_with_line_plot_b(
+    #                                     L1,
+    #                                     L2,
+    #                                     # base line
+    #                                     activated_neurons_L1_base_vis,
+    #                                     activated_neurons_L2_base_vis,
+    #                                     non_activated_neurons_L1_base_vis,
+    #                                     non_activated_neurons_L2_base_vis,
+    #                                     shared_neurons_base_vis,
+    #                                     specific_neurons_L1_base_vis,
+    #                                     specific_neurons_L2_base_vis,
+    #                                     non_activated_neurons_all_base_vis,
+    #                                     "only_1s"
+    #                                 )
 
 if __name__ == "__main__":
     print('visualization completed.')

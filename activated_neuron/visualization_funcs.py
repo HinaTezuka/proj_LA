@@ -41,8 +41,8 @@ def visualize_neurons_with_line_plot_simple(
     # counting activate/non-activate counts
     for layer_idx in range(num_layers):
 
-        L2_counts[layer_idx] = len(activated_neurons_L1[layer_idx])  # nums for ja neurons
-        L1_counts[layer_idx] = len(activated_neurons_L2[layer_idx])  # nums for en neurons
+        L1_counts[layer_idx] = len(activated_neurons_L1[layer_idx])  # nums for ja neurons
+        L2_counts[layer_idx] = len(activated_neurons_L2[layer_idx])  # nums for en neurons
         shared_counts[layer_idx] = len(shared_neurons[layer_idx])  # shared_neurons
         specific_L2_counts[layer_idx] = len(specific_neurons_L2[layer_idx])  # specific neurons for ja
         specific_L1_counts[layer_idx] = len(specific_neurons_L1[layer_idx])  # specific neurons for en
