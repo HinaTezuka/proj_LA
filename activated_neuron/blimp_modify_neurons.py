@@ -36,52 +36,109 @@ tokenizer = AutoTokenizer.from_pretrained(model_names["ja"])
 #     print("Edited activation values:", tr.output)  # 編集された活性化値
 #     print(tokenizer.decode(output[0], skip_special_tokens=True))
 
-import random
+""" """
+# import random
 
-# レイヤー番号31は固定
-layer_idx = 31
+# # レイヤー番号31は固定
+# layer_idx = 31
 
-# ニューロンインデックスの1から14000のユニークな数をランダムに選択
-neuron_indices = random.sample(range(1, 14001), 1000)
+# # ニューロンインデックスの1から14000のユニークな数をランダムに選択
+# neuron_indices = random.sample(range(1, 14001), 1000)
 
-# (レイヤー番号, ニューロンインデックス) のタプルを作成
-layer_idx_and_neuron_idx = [(layer_idx, idx) for idx in neuron_indices]
+# # (レイヤー番号, ニューロンインデックス) のタプルを作成
+# layer_idx_and_neuron_idx = [(layer_idx, idx) for idx in neuron_indices]
 
-# 結果を確認
-print(len(layer_idx_and_neuron_idx))  # 1000
-print(layer_idx_and_neuron_idx[:5])  # 最初の5つのタプルを表示
+# # 結果を確認
+# print(len(layer_idx_and_neuron_idx))  # 1000
+# print(layer_idx_and_neuron_idx[:5])  # 最初の5つのタプルを表示
 # sys.exit()
 
+# def edit_activation(output, layer, layer_idx_and_neuron_idx):
+#     """
+#     特定のレイヤーインデックスと複数のニューロンインデックスを指定して活性化値を操作
+#     :param output: 活性化値
+#     :param layer: 現在のレイヤー情報
+#     :param layer_idx_and_neuron_idx: 対象のレイヤーインデックスとニューロンインデックスのリスト
+#     """
+#     for layer_idx, neuron_idx in layer_idx_and_neuron_idx:
+#         # 指定されたレイヤーに対して操作を行う
+#         if str(layer_idx) in layer:
+#             # ニューロンのインデックスが範囲内かをチェック
+#             if neuron_idx < output.shape[2]:
+#                 # 指定されたニューロンの活性化値を変更
+#                 # for
+#                 output[:, :, neuron_idx] *= 0
+#             else:
+#                 print(f"Warning: neuron_idx {neuron_idx} is out of bounds for output with shape {output.shape}")
+#         else:
+#             print(f"Warning: layer_idx {layer_idx} is not found in the layer.")
+
+#     return output
+
+# # モデルの入力を設定
+# input_t = 'こんにちは。今日は'
+# input_ids = tokenizer(input_t, return_tensors="pt")
+# layer_idx = 31
+
+# # Traceの開始
+# with Trace(model, f'model.layers.{layer_idx}.mlp.act_fn', edit_output=lambda output, layer: edit_activation(output, layer, layer_idx_and_neuron_idx)) as tr:
+#     output = model.generate(input_ids["input_ids"])  # モデル推論
+#     print("Edited activation values:", tr.output)  # 編集された活性化値
+#     print(tokenizer.decode(output[0], skip_special_tokens=True))
+
+""" Test """
+
+""" 複数の (layer_idx, neuron_idx) のペアをリストに定義 """
+
+""" randomリストを作成(test用) """
+import random
+# リストの長さ
+list_length = 14000
+# レイヤーインデックスの範囲
+layer_indices = list(range(32))  # 0から31までのレイヤーインデックス
+# ニューロンインデックスの範囲
+neuron_index_range = (0, 14335)
+# 最終リストを作成
+layer_idx_and_neuron_idx = []
+layer_idx_and_neuron_idx.append((31, 14335))
+layer_idx_and_neuron_idx.append((31, 14334))
+layer_idx_and_neuron_idx.append((31, 14333))
+# 各layer_idxに対して、順番に2000個のタプルを生成
+for layer_idx in layer_indices:
+    # 各layer_idxに対してランダムなneuron_idxをリストに追加
+    layer_idx_and_neuron_idx.extend([(layer_idx, random.randint(*neuron_index_range)) for _ in range(list_length // len(layer_indices))])
+# 作成したリストを表示
+# print(layer_idx_and_neuron_idx)
+# sys.exit()
+""" """"
+
+"""  """
+""" func for editing activation values """
 def edit_activation(output, layer, layer_idx_and_neuron_idx):
     """
-    特定のレイヤーインデックスと複数のニューロンインデックスを指定して活性化値を操作
-    :param output: 活性化値
-    :param layer: 現在のレイヤー情報
-    :param layer_idx_and_neuron_idx: 対象のレイヤーインデックスとニューロンインデックスのリスト
+    edit activation value of neurons(indexed layer_idx and neuron_idx)
+    output: activation values
+    layer: sth like 'model.layers.{layer_idx}.mlp.act_fn'
+    layer_idx_and_neuron_idx: list of tuples like [(layer_idx, neuron_idx), ....]
     """
     for layer_idx, neuron_idx in layer_idx_and_neuron_idx:
-        # 指定されたレイヤーに対して操作を行う
-        if str(layer_idx) in layer:
-            # ニューロンのインデックスが範囲内かをチェック
-            if neuron_idx < output.shape[2]:
-                # 指定されたニューロンの活性化値を変更
-                # for
-                output[:, :, neuron_idx] *= 0
+        if str(layer_idx) in layer:  # layer名にlayer_idxが含まれているか確認
+            if neuron_idx < output.shape[2]:  # ニューロンインデックスが範囲内かチェック
+                output[:, :, neuron_idx] *= 0  # 指定されたニューロンの活性化値をゼロに設定
+                # print(output[:, :, neuron_idx])
+                # print(f"Layer {layer_idx}, Neuron {neuron_idx} activation set to 0")  # 確認用出力
             else:
                 print(f"Warning: neuron_idx {neuron_idx} is out of bounds for output with shape {output.shape}")
-        else:
-            print(f"Warning: layer_idx {layer_idx} is not found in the layer.")
 
     return output
 
-# モデルの入力を設定
-input_t = 'こんにちは。今日は'
-input_ids = tokenizer(input_t, return_tensors="pt")
-layer_idx = 31
+# Traceで複数のレイヤーを追跡
+trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_idx_and_neuron_idx]
+with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_idx_and_neuron_idx)) as tr:
+    # モデルの入力を設定
+    input_t = 'こんにちは。今日は'
+    input_ids = tokenizer(input_t, return_tensors="pt")
+    # モデル推論
+    output = model.generate(input_ids["input_ids"])
 
-# Traceの開始
-with Trace(model, f'model.layers.{layer_idx}.mlp.act_fn', edit_output=lambda output, layer: edit_activation(output, layer, layer_idx_and_neuron_idx)) as tr:
-    output = model.generate(input_ids["input_ids"])  # モデル推論
-    print("Edited activation values:", tr.output)  # 編集された活性化値
     print(tokenizer.decode(output[0], skip_special_tokens=True))
-
