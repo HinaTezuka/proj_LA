@@ -2,6 +2,7 @@
 
 import sys
 sys.path.append("/home/s2410121/proj_LA/activated_neuron")
+import pickle
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,9 +20,9 @@ model_names = {
     # "base": "meta-llama/Meta-Llama-3-8B",
     "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
     # "de": "DiscoResearch/Llama3-German-8B", # ger
-    "nl": "ReBatch/Llama-3-8B-dutch", # du
-    "it": "DeepMount00/Llama-3-8b-Ita", # ita
-    "ko": "beomi/Llama-3-KoEn-8B", # ko
+    # "nl": "ReBatch/Llama-3-8B-dutch", # du
+    # "it": "DeepMount00/Llama-3-8b-Ita", # ita
+    # "ko": "beomi/Llama-3-KoEn-8B", # ko
 }
 
 L1 = "en" # L1 is fixed to english.
@@ -50,15 +51,13 @@ for L2, model_name in model_names.items():
     print(tatoeba_data_base)
 
     """ tracking neurons """
-    neuron_detection_dict, neuron_detection_dict_vis = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0.1, 0)
-    neuron_detection_base_dict, neuron_detection_base_dict_vis = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data_base, 0.1, 0)
-    # print(len(neuron_detection_base_dict["shared_neurons"]))
-    # print(len(neuron_detection_dict["shared_neurons"]))
-    # sys.exit()
+    neuron_detection_dict, neuron_detection_dict_vis, track_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0.5, 0)
+    neuron_detection_base_dict, neuron_detection_base_dict_vis, track_base_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data_base, 0.5, 0)
 
     # delete some cache
     del model
     torch.cuda.empty_cache()
+
     """ main """
     #
     activated_neurons_L1 = neuron_detection_dict["activated_neurons_L1"]
@@ -98,23 +97,35 @@ for L2, model_name in model_names.items():
     specific_neurons_L2_base_vis = neuron_detection_base_dict_vis["specific_neurons_L2"]
     non_activated_neurons_all_base_vis = neuron_detection_base_dict_vis["non_activated_neurons_all"]
 
+    """ (初回だけ)pickleでfileにshared_neurons(track_dict)を保存 """
+    # with open("/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_tatoeba_05_th.pkl", "wb") as f:
+    #     pickle.dump(track_dict, f)
+    # print("pickle file saved.")
+
+    """ pickle file(shared_neurons)の解凍/読み込み """
+    with open("/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_tatoeba_05_th.pkl", "rb") as f:
+        loaded_dict = pickle.load(f)
+    print("unfold pickle")
+    print(loaded_dict)
+    sys.exit()
+
     """ visualization """
-    visualize_neurons_with_line_plot_simple(
-                                        L1,
-                                        L2,
-                                        # main
-                                        activated_neurons_L1_vis,
-                                        activated_neurons_L2_vis,
-                                        non_activated_neurons_L1_vis,
-                                        non_activated_neurons_L2_vis,
-                                        shared_neurons_vis,
-                                        specific_neurons_L1_vis,
-                                        specific_neurons_L2_vis,
-                                        non_activated_neurons_all_vis,
-                                        "tatoeba_0.1_th",
-                                        # base line
-                                        shared_neurons_base_vis,
-                                    )
+    # visualize_neurons_with_line_plot_simple(
+    #                                     L1,
+    #                                     L2,
+    #                                     # main
+    #                                     activated_neurons_L1_vis,
+    #                                     activated_neurons_L2_vis,
+    #                                     non_activated_neurons_L1_vis,
+    #                                     non_activated_neurons_L2_vis,
+    #                                     shared_neurons_vis,
+    #                                     specific_neurons_L1_vis,
+    #                                     specific_neurons_L2_vis,
+    #                                     non_activated_neurons_all_vis,
+    #                                     "tatoeba_0.1_th",
+    #                                     # base line
+    #                                     shared_neurons_base_vis,
+    #                                 )
 
     # visualize_neurons_with_line_plot(
     #                                     L1,

@@ -6,9 +6,12 @@ import itertools
 import sys
 sys.path.append("/home/s2410121/proj_LA/activated_neuron")
 
+from collections import defaultdict
+
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+
 from baukit import Trace, TraceDict
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig, AutoModel
 from datasets import load_dataset
@@ -179,6 +182,9 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
     specific_neurons_L1_vis = [set() for _ in range(num_layers)]
     non_activated_neurons_all_vis = [set() for _ in range(num_layers)]
 
+    # dict for tracking layers and shared_neurons for analysis later
+    track_dict = defaultdict(set) # layer_idx: neuron_indices(set)
+
     # Track neurons with tatoeba
     for L1_text, L2_text in data:
         # L1 text
@@ -203,7 +209,6 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
 
             activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] > active_THRESHOLD).cpu().numpy()
             # activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] != 0]
-            # 最後のトークンだけ考慮する
             activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
             activated_neurons_L2.append((layer_idx, activated_neurons_L2_layer))
             activated_neurons_L2_vis[layer_idx].update(np.unique(activated_neurons_L2_layer[:, 2]))
@@ -211,14 +216,12 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
             # Non-activated neurons for L1 and L2
             non_activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
             # non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] != 0]
-            # 最後のトークンだけ考慮する
             non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
             non_activated_neurons_L1.append((layer_idx, non_activated_neurons_L1_layer))
             non_activated_neurons_L1_vis[layer_idx].update(np.unique(non_activated_neurons_L1_layer[:, 2]))
 
             non_activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
             # non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] != 0]
-            # 最後のトークンだけ考慮する
             non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
             non_activated_neurons_L2.append((layer_idx, non_activated_neurons_L2_layer))
             non_activated_neurons_L2_vis[layer_idx].update(np.unique(non_activated_neurons_L2_layer[:, 2]))
@@ -232,6 +235,8 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
             shared_neurons_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], activated_neurons_L2_layer[:, 2])
             shared_neurons.append((layer_idx, shared_neurons_layer))
             shared_neurons_vis[layer_idx].update(shared_neurons_layer)
+            """ track layer_idx and neuron_idx for analysis """
+            track_dict = extract_neuron_indices(track_dict, layer_idx, shared_neurons_layer)
 
             # Specific neurons
             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
@@ -265,7 +270,20 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         "non_activated_neurons_all": non_activated_neurons_all_vis
     }
 
-    return output_dict, output_dict_vis
+    return output_dict, output_dict_vis, track_dict
+
+""" 発火したニューロンのindexなども追跡 """
+def extract_neuron_indices(track_dict: defaultdict(set), layer_idx: int, activation_layer: np.array):
+    """
+    make a dict for tracking which neuron of which layer are activated/non-activated as idx
+    (both for shared neurons and language specific neurons)
+
+    activation_layer: np.array which has indices of activated neurons
+    """
+    track_dict[layer_idx].update(np.unique(activation_layer))
+
+    return track_dict
+
 
 """ sentenceごとの管理を追加 """
 # def track_neurons_with_text_data(model, tokenizer, data, active_THRESHOLD=0, non_active_THRESHOLD=0) -> dict: # data <- 通常はtatoeba
