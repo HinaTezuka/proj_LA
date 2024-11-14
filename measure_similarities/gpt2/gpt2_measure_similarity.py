@@ -1,7 +1,31 @@
 """
 memo:
 ・GPT-2-smallを対象に調査
-・google colabですでに同じ検証をしている: https://colab.research.google.com/drive/1h_wSGMWQRtcdFM88tgZdc3qLQjtDSN1u#scrollTo=8TbA3b1uqPeW
+
+GPT2Model(
+  (wte): Embedding(50257, 768)
+  (wpe): Embedding(1024, 768)
+  (drop): Dropout(p=0.1, inplace=False)
+  (h): ModuleList(
+    (0-11): 12 x GPT2Block(
+      (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      (attn): GPT2SdpaAttention(
+        (c_attn): Conv1D()
+        (c_proj): Conv1D()
+        (attn_dropout): Dropout(p=0.1, inplace=False)
+        (resid_dropout): Dropout(p=0.1, inplace=False)
+      )
+      (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      (mlp): GPT2MLP(
+        (c_fc): Conv1D()
+        (c_proj): Conv1D()
+        (act): NewGELUActivation()
+        (dropout): Dropout(p=0.1, inplace=False)
+      )
+    )
+  )
+  (ln_f): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+)
 """
 import sys
 sys.path.append('../')
@@ -57,6 +81,7 @@ state_dict_gpt2_spa = gpt2_model_spa.state_dict() # spanish
 # state_dict_gpt2_fre.keys()
 # state_dict_gpt2_ko.keys()
 # state_dict_gpt2_spa.keys()
+# sys.exit()
 
 """ 計算結果を保存する用の辞書 """
 
