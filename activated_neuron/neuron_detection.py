@@ -18,11 +18,11 @@ from visualization_funcs import visualize_neurons_with_line_plot, visualize_neur
 # LLaMA-3
 model_names = {
     # "base": "meta-llama/Meta-Llama-3-8B",
-    "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
+    # "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
     # "de": "DiscoResearch/Llama3-German-8B", # ger
-    # "nl": "ReBatch/Llama-3-8B-dutch", # du
-    # "it": "DeepMount00/Llama-3-8b-Ita", # ita
-    # "ko": "beomi/Llama-3-KoEn-8B", # ko
+    "nl": "ReBatch/Llama-3-8B-dutch", # du
+    "it": "DeepMount00/Llama-3-8b-Ita", # ita
+    "ko": "beomi/Llama-3-KoEn-8B", # ko
 }
 
 L1 = "en" # L1 is fixed to english.
@@ -98,16 +98,17 @@ for L2, model_name in model_names.items():
     non_activated_neurons_all_base_vis = neuron_detection_base_dict_vis["non_activated_neurons_all"]
 
     """ (初回だけ)pickleでfileにshared_neurons(track_dict)を保存 """
-    # with open("/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_tatoeba_05_th.pkl", "wb") as f:
-    #     pickle.dump(track_dict, f)
-    # print("pickle file saved.")
+    with open(f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_en_{L2}_tatoeba_05_th.pkl", "wb") as f:
+        pickle.dump(track_dict, f)
+    print("pickle file saved.")
 
     """ pickle file(shared_neurons)の解凍/読み込み """
-    with open("/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_tatoeba_05_th.pkl", "rb") as f:
+    with open(f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_en_{L2}_tatoeba_05_th.pkl", "rb") as f:
         loaded_dict = pickle.load(f)
     print("unfold pickle")
     print(loaded_dict)
-    sys.exit()
+    # sys.exit()
+
 
     """ visualization """
     # visualize_neurons_with_line_plot_simple(
@@ -122,7 +123,7 @@ for L2, model_name in model_names.items():
     #                                     specific_neurons_L1_vis,
     #                                     specific_neurons_L2_vis,
     #                                     non_activated_neurons_all_vis,
-    #                                     "tatoeba_0.1_th",
+    #                                     "tatoeba_0.5_th",
     #                                     # base line
     #                                     shared_neurons_base_vis,
     #                                 )
