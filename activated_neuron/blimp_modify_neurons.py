@@ -93,26 +93,24 @@ tokenizer = AutoTokenizer.from_pretrained(model_names["ja"])
 """ randomリストを作成(test用) """
 import random
 # リストの長さ
-list_length = 14000
+list_length = 2000
 # レイヤーインデックスの範囲
 layer_indices = list(range(32))  # 0から31までのレイヤーインデックス
+
 # ニューロンインデックスの範囲
 neuron_index_range = (0, 14335)
 # 最終リストを作成
 layer_idx_and_neuron_idx = []
-layer_idx_and_neuron_idx.append((31, 14335))
-layer_idx_and_neuron_idx.append((31, 14334))
-layer_idx_and_neuron_idx.append((31, 14333))
 # 各layer_idxに対して、順番に2000個のタプルを生成
 for layer_idx in layer_indices:
     # 各layer_idxに対してランダムなneuron_idxをリストに追加
     layer_idx_and_neuron_idx.extend([(layer_idx, random.randint(*neuron_index_range)) for _ in range(list_length // len(layer_indices))])
 # 作成したリストを表示
-# print(layer_idx_and_neuron_idx)
+print(layer_idx_and_neuron_idx)
+print(len(layer_idx_and_neuron_idx))
 # sys.exit()
-""" """"
+""" """
 
-"""  """
 """ func for editing activation values """
 def edit_activation(output, layer, layer_idx_and_neuron_idx):
     """
@@ -132,6 +130,27 @@ def edit_activation(output, layer, layer_idx_and_neuron_idx):
 
     return output
 
+# def edit_activation(output, layer, layer_idx_and_neuron_idx):
+#     """
+#     edit activation value of neurons(indexed layer_idx and neuron_idx)
+#     output: activation values
+#     layer: sth like 'model.layers.{layer_idx}.mlp.act_fn'
+#     layer_idx_and_neuron_idx: list of tuples like [(layer_idx, neuron_idx), ....]
+#     """
+#     for layer_idx, neuron_idx in layer_idx_and_neuron_idx:
+#         if str(layer_idx) in layer and layer_idx != 31:  # layer名にlayer_idxが含まれているか確認
+#             if neuron_idx < output.shape[2]:  # ニューロンインデックスが範囲内かチェック
+#                 output[:, :, neuron_idx] *= 0  # 指定されたニューロンの活性化値をゼロに設定
+#                 # print(output[:, :, neuron_idx])
+#                 # print(f"Layer {layer_idx}, Neuron {neuron_idx} activation set to 0")  # 確認用出力
+#             else:
+#                 print(f"Warning: neuron_idx {neuron_idx} is out of bounds for output with shape {output.shape}")
+#         elif str(layer_idx) in layer and layer_idx == 31:
+#             if neuron_idx < output.shape[2]:  # ニューロンインデックスが範囲内かチェック
+#                 output[:, :, neuron_idx] *= 1
+
+#     return output
+
 # Traceで複数のレイヤーを追跡
 trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_idx_and_neuron_idx]
 with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_idx_and_neuron_idx)) as tr:
@@ -141,4 +160,50 @@ with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activ
     # モデル推論
     output = model.generate(input_ids["input_ids"])
 
+    # logits ver.
+    # with torch.no_grad():
+    #     output = model(**input_ids)
+    # print(output)
+    # sys.exit()
+
     print(tokenizer.decode(output[0], skip_special_tokens=True))
+
+""" TraceDictではなく、Traceで1つ1つ層ごとに操作 """
+# # 特定のレイヤーとニューロンの発火値を編集する関数
+# def edit_activation(output, layer_idx_and_neuron_idx, current_layer_idx):
+#     """
+#     現在のレイヤーで指定されたニューロンの発火値を操作する
+#     """
+#     for layer_idx, neuron_idx in layer_idx_and_neuron_idx:
+#         if layer_idx == current_layer_idx:  # 現在のレイヤーに該当するか
+#             if neuron_idx < output.shape[2]:  # ニューロンインデックスが範囲内かチェック
+#                 output[:, :, neuron_idx] *= 0  # 発火値をゼロに設定
+#             else:
+#                 print(f"Warning: neuron_idx {neuron_idx} out of bounds for output shape {output.shape}")
+#     return output
+
+# # 発火値を編集するレイヤーとニューロンのリストを生成
+# list_length = 14000
+# layer_indices = list(range(32))  # 0〜31層
+# neuron_index_range = (0, 14335)
+
+# layer_idx_and_neuron_idx = []
+# for layer_idx in layer_indices:
+#     layer_idx_and_neuron_idx.extend([(layer_idx, random.randint(*neuron_index_range)) for _ in range(list_length // len(layer_indices))])
+# print(layer_idx_and_neuron_idx)
+# print(len(layer_idx_and_neuron_idx))
+
+
+# # 編集対象のレイヤーを順番に処理
+# input_text = "こんにちは。今日は"
+# input_ids = tokenizer(input_text, return_tensors="pt")
+
+# for layer_idx in layer_indices:
+#     # レイヤーごとにTraceを設定
+#     with Trace(model, f"model.layers.{layer_idx}.mlp.act_fn",
+#                edit_output=lambda output, layer: edit_activation(output, layer_idx_and_neuron_idx, layer_idx)) as tr:
+#         output = model.generate(input_ids["input_ids"])  # 推論
+#         print(f"Layer {layer_idx} processed.")
+
+# # 最終的な出力結果
+# print("Generated Text:", tokenizer.decode(output[0], skip_special_tokens=True))
