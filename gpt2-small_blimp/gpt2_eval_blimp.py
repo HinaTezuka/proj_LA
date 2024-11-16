@@ -103,7 +103,7 @@ for model_name in model_names:
 df = pd.DataFrame(results)
 print(df)
 
-# 各モデルごとに正答率の平均を計算します
+# 各モデルごとに正答率の平均を計算
 overall_accuracy = df.groupby('Model')['Accuracy'].mean().reset_index()
 print(overall_accuracy)
 
