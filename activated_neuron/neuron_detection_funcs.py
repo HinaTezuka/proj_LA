@@ -35,9 +35,9 @@ def act_llama3(model, input_ids):
     # mlp_act_np = [act.detach().numpy() for act in mlp_act_tensors]
     return mlp_act
 
-# def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRESHOLD=0, non_active_THRESHOLD=0) -> dict: # data <- 通常はtatoeba
-
-#     """ list for tracking neurons: len(data) = nums of sentence """
+""" track neuron activateion """
+# def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRESHOLD=0, non_active_THRESHOLD=0) -> dict:
+#     # Initialize lists for tracking neurons
 #     activated_neurons_L2 = []
 #     activated_neurons_L1 = []
 #     non_activated_neurons_L2 = []
@@ -46,95 +46,84 @@ def act_llama3(model, input_ids):
 #     specific_neurons_L2 = []
 #     specific_neurons_L1 = []
 #     non_activated_neurons_all = []
-#     """ for visualization """
-#     activated_neurons_L2_vis = [[] for _ in range(32)]
-#     activated_neurons_L1_vis = [[] for _ in range(32)]
-#     non_activated_neurons_L2_vis = [[] for _ in range(32)]
-#     non_activated_neurons_L1_vis = [[] for _ in range(32)]
-#     shared_neurons_vis = [[] for _ in range(32)]
-#     specific_neurons_L2_vis = [[] for _ in range(32)]
-#     specific_neurons_L1_vis = [[] for _ in range(32)]
-#     non_activated_neurons_all_vis = [[] for _ in range(32)]
 
+#     # Initialize sets for visualization
 #     num_layers = 32 if model_name == "llama" else 12
-#     """ track neurons with tatoeba """
+#     activated_neurons_L2_vis = [set() for _ in range(num_layers)]
+#     activated_neurons_L1_vis = [set() for _ in range(num_layers)]
+#     non_activated_neurons_L2_vis = [set() for _ in range(num_layers)]
+#     non_activated_neurons_L1_vis = [set() for _ in range(num_layers)]
+#     shared_neurons_vis = [set() for _ in range(num_layers)]
+#     specific_neurons_L2_vis = [set() for _ in range(num_layers)]
+#     specific_neurons_L1_vis = [set() for _ in range(num_layers)]
+#     non_activated_neurons_all_vis = [set() for _ in range(num_layers)]
+
+#     # dict for tracking layers and shared_neurons for analysis later
+#     track_dict = defaultdict(set) # layer_idx: neuron_indices(set)
+
+#     # Track neurons with tatoeba
 #     for L1_text, L2_text in data:
 #         # L1 text
 #         input_ids_L1 = tokenizer(L1_text, return_tensors="pt").input_ids.to("cuda")
+#         # print(tokenizer.decode(input_ids_L1[0][-1]))
+#         token_len_L1 = len(input_ids_L1[0])
 #         mlp_activation_L1 = act_llama3(model, input_ids_L1)
 #         # L2 text
 #         input_ids_L2 = tokenizer(L2_text, return_tensors="pt").input_ids.to("cuda")
+#         token_len_L2 = len(input_ids_L2[0])
 #         mlp_activation_L2 = act_llama3(model, input_ids_L2)
-#         """
-#         mlp_activation_L1/L2 <- 層の数（llamaなら32）のリスト
-#         len(mlp_activation_L1): nums of layer (32: llamaの場合)
-#         len(mlp_activation_L1[0]): batch size <- 1(1文しか入れていないため)
-#         len(mlp_activation_L1[0][0]): nums of token(of a input sentence)
-#         len(mlp_activation_L1[0][0][0]): 14336(= nums of neuron)
-#         """
 
-#         """ aggregate each type of neurons per each layer """
 #         for layer_idx in range(len(mlp_activation_L2)):
-
-#             """ activated neurons """
-#             # activated neurons for L1
+#             # Activated neurons for L1 and L2
 #             activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] > active_THRESHOLD).cpu().numpy()
-#             # remove activation to 0-th token (for LLaMA3, it's <|begin_of_text|>)
-#             activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] != 0]
+#             # 最初の文頭トークンをカウントしない
+#             # activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] != 0]
+#             # 最後のトークンだけ考慮する
+#             activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
 #             activated_neurons_L1.append((layer_idx, activated_neurons_L1_layer))
-#             activated_neurons_L1_vis[layer_idx].append(np.unique(activated_neurons_L1_layer[:, 2]).tolist())
-#             # activated neurons for L2
-#             activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] > active_THRESHOLD).cpu().numpy()
-#             # remove activation to 0-th token (for LLaMA3, it's <|begin_of_text|>)
-#             activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] != 0]
-#             activated_neurons_L2.append((layer_idx, activated_neurons_L2_layer))
-#             activated_neurons_L2_vis[layer_idx].append(np.unique(activated_neurons_L2_layer[:, 2]).tolist())
+#             activated_neurons_L1_vis[layer_idx].update(np.unique(activated_neurons_L1_layer[:, 2]))
 
-#             """ non-activated neurons """
-#             # non-activated neurons for L1
+#             activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] > active_THRESHOLD).cpu().numpy()
+#             # activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] != 0]
+#             activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
+#             activated_neurons_L2.append((layer_idx, activated_neurons_L2_layer))
+#             activated_neurons_L2_vis[layer_idx].update(np.unique(activated_neurons_L2_layer[:, 2]))
+
+#             # Non-activated neurons for L1 and L2
 #             non_activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
-#             non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] != 0]
+#             # non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] != 0]
+#             non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
 #             non_activated_neurons_L1.append((layer_idx, non_activated_neurons_L1_layer))
-#             non_activated_neurons_L1_vis[layer_idx].append(np.unique(non_activated_neurons_L1_layer[:, 2]).tolist())
-#             # non-activated neurons for L2
+#             non_activated_neurons_L1_vis[layer_idx].update(np.unique(non_activated_neurons_L1_layer[:, 2]))
+
 #             non_activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
-#             non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] != 0]
+#             # non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] != 0]
+#             non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
 #             non_activated_neurons_L2.append((layer_idx, non_activated_neurons_L2_layer))
-#             non_activated_neurons_L2_vis[layer_idx].append(np.unique(non_activated_neurons_L2_layer[:, 2]).tolist())
-#             # non-activated_neurons for both L1 and L2
+#             non_activated_neurons_L2_vis[layer_idx].update(np.unique(non_activated_neurons_L2_layer[:, 2]))
+
+#             # Non-activated neurons for both L1 and L2
 #             non_activated_neurons_both_L1_L2_layer = np.intersect1d(non_activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
 #             non_activated_neurons_all.append((layer_idx, non_activated_neurons_both_L1_L2_layer))
-#             non_activated_neurons_all_vis[layer_idx].append(non_activated_neurons_both_L1_L2_layer)
+#             non_activated_neurons_all_vis[layer_idx].update(non_activated_neurons_both_L1_L2_layer)
 
-#             """ shared neurons """
-#             # shared neurons for both L1 and L2
+#             # Shared neurons
 #             shared_neurons_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], activated_neurons_L2_layer[:, 2])
-#             # shared_neurons_layer = np.intersect1d(activated_neurons_L2_layer, activated_neurons_L1_layer)
 #             shared_neurons.append((layer_idx, shared_neurons_layer))
-#             shared_neurons_vis[layer_idx].append(shared_neurons_layer)
+#             shared_neurons_vis[layer_idx].update(shared_neurons_layer)
+#             """ track layer_idx and neuron_idx for analysis """
+#             track_dict = extract_neuron_indices(track_dict, layer_idx, shared_neurons_layer)
 
-#             """ specific neurons """
+#             # Specific neurons
 #             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
-#             # specific_neurons_L1_layer = np.intersect1d(specific_neurons_L1_layer, shared_neurons_layer)
 #             specific_neurons_L1.append((layer_idx, specific_neurons_L1_layer))
-#             specific_neurons_L1_vis[layer_idx].append(specific_neurons_L1_layer)
-#             # specific neurons for L2
+#             specific_neurons_L1_vis[layer_idx].update(specific_neurons_L1_layer)
+
 #             specific_neurons_L2_layer = np.intersect1d(activated_neurons_L2_layer[:, 2], non_activated_neurons_L1_layer[:, 2])
-#             # specific_neurons_L2_layer = np.intersect1d(specific_neurons_L2_layer, shared_neurons_layer)
 #             specific_neurons_L2.append((layer_idx, specific_neurons_L2_layer))
-#             specific_neurons_L2_vis[layer_idx].append(specific_neurons_L2_layer)
+#             specific_neurons_L2_vis[layer_idx].update(specific_neurons_L2_layer)
 
-#     """ flatten lists for visualization"""
-#     for layer_idx in range(num_layers):
-#         activated_neurons_L1_vis[layer_idx] = set(list(itertools.chain.from_iterable(activated_neurons_L1_vis[layer_idx])))
-#         activated_neurons_L2_vis[layer_idx] = set(list(itertools.chain.from_iterable(activated_neurons_L2_vis[layer_idx])))
-#         non_activated_neurons_L1_vis[layer_idx] = set(list(itertools.chain.from_iterable(non_activated_neurons_L1_vis[layer_idx])))
-#         non_activated_neurons_L2_vis[layer_idx] = set(list(itertools.chain.from_iterable(non_activated_neurons_L2_vis[layer_idx])))
-#         non_activated_neurons_all_vis[layer_idx] = set(list(itertools.chain.from_iterable(non_activated_neurons_all_vis[layer_idx])))
-#         shared_neurons_vis[layer_idx] = set(list(itertools.chain.from_iterable(shared_neurons_vis[layer_idx])))
-#         specific_neurons_L1_vis[layer_idx] = set(list(itertools.chain.from_iterable(specific_neurons_L1_vis[layer_idx])))
-#         specific_neurons_L2_vis[layer_idx] = set(list(itertools.chain.from_iterable(specific_neurons_L2_vis[layer_idx])))
-
+#     # Create output dictionaries
 #     output_dict = {
 #         "activated_neurons_L1": activated_neurons_L1,
 #         "activated_neurons_L2": activated_neurons_L2,
@@ -157,33 +146,35 @@ def act_llama3(model, input_ids):
 #         "non_activated_neurons_all": non_activated_neurons_all_vis
 #     }
 
-#     return output_dict, output_dict_vis
+#     return output_dict, output_dict_vis, track_dict
 
-""" 最初からsetで管理 """
+""" 平均のプロット/発火頻度の保存バージョン """
 def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRESHOLD=0, non_active_THRESHOLD=0) -> dict:
     # Initialize lists for tracking neurons
     activated_neurons_L2 = []
     activated_neurons_L1 = []
-    non_activated_neurons_L2 = []
-    non_activated_neurons_L1 = []
     shared_neurons = []
     specific_neurons_L2 = []
     specific_neurons_L1 = []
-    non_activated_neurons_all = []
 
-    # Initialize sets for visualization
+    # layers_num
     num_layers = 32 if model_name == "llama" else 12
-    activated_neurons_L2_vis = [set() for _ in range(num_layers)]
-    activated_neurons_L1_vis = [set() for _ in range(num_layers)]
-    non_activated_neurons_L2_vis = [set() for _ in range(num_layers)]
-    non_activated_neurons_L1_vis = [set() for _ in range(num_layers)]
-    shared_neurons_vis = [set() for _ in range(num_layers)]
-    specific_neurons_L2_vis = [set() for _ in range(num_layers)]
-    specific_neurons_L1_vis = [set() for _ in range(num_layers)]
-    non_activated_neurons_all_vis = [set() for _ in range(num_layers)]
+    # sentence_idx
+    sentence_idx = 0
 
-    # dict for tracking layers and shared_neurons for analysis later
-    track_dict = defaultdict(set) # layer_idx: neuron_indices(set)
+    # 発火頻度の保存（層・ニューロンごと）: {layer_idx: neuron_idx: activation_freq}
+    act_freq_L1 = defaultdict(lambda: defaultdict(int))
+    act_freq_L2 = defaultdict(lambda: defaultdict(int))
+    act_freq_shared = defaultdict(lambda: defaultdict(int))
+    act_freq_L1_only = defaultdict(lambda: defaultdict(int))
+    act_freq_L2_only = defaultdict(lambda: defaultdict(int))
+
+    # layerごとの発火数の保存（平均集計・プロットのため） {sentence_idx: layer_idx: len_of_all_activated_neurons}
+    activated_neurons_L2_vis = defaultdict(lambda: defaultdict(int))
+    activated_neurons_L1_vis = defaultdict(lambda: defaultdict(int))
+    shared_neurons_vis = defaultdict(lambda: defaultdict(int))
+    specific_neurons_L2_vis = defaultdict(lambda: defaultdict(int))
+    specific_neurons_L1_vis = defaultdict(lambda: defaultdict(int))
 
     # Track neurons with tatoeba
     for L1_text, L2_text in data:
@@ -200,77 +191,91 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         for layer_idx in range(len(mlp_activation_L2)):
             # Activated neurons for L1 and L2
             activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] > active_THRESHOLD).cpu().numpy()
-            # 最初の文頭トークンをカウントしない
-            # activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] != 0]
             # 最後のトークンだけ考慮する
             activated_neurons_L1_layer = activated_neurons_L1_layer[activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
             activated_neurons_L1.append((layer_idx, activated_neurons_L1_layer))
-            activated_neurons_L1_vis[layer_idx].update(np.unique(activated_neurons_L1_layer[:, 2]))
+            activated_neurons_L1_vis[sentence_idx][layer_idx] = activated_neurons_L1_layer[:, 1].mean()
+            # 発火頻度の保存（layer, neuronごと）
+            for neuron_idx in activated_neurons_L1_layer[:, 2]:
+                act_freq_L1[layer_idx][neuron_idx] += 1
+            # 発火ニューロン数の保存（プロット時に平均算出のため）
+            activated_neurons_L1_vis[sentence_idx][layer_idx] = len(activated_neurons_L1_layer[:, 2])
+
 
             activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] > active_THRESHOLD).cpu().numpy()
-            # activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] != 0]
             activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
             activated_neurons_L2.append((layer_idx, activated_neurons_L2_layer))
-            activated_neurons_L2_vis[layer_idx].update(np.unique(activated_neurons_L2_layer[:, 2]))
+            # 発火頻度の保存（layer, neuronごと）
+            for neuron_idx in activated_neurons_L2_layer[:, 2]:
+                act_freq_L2[layer_idx][neuron_idx] += 1
+            # 発火ニューロン数の保存（プロット時に平均算出のため）
+            activated_neurons_L2_vis[sentence_idx][layer_idx] = len(activated_neurons_L2_layer[:, 2])
 
             # Non-activated neurons for L1 and L2
             non_activated_neurons_L1_layer = torch.nonzero(mlp_activation_L1[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
-            # non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] != 0]
             non_activated_neurons_L1_layer = non_activated_neurons_L1_layer[non_activated_neurons_L1_layer[:, 1] == token_len_L1 - 1]
-            non_activated_neurons_L1.append((layer_idx, non_activated_neurons_L1_layer))
-            non_activated_neurons_L1_vis[layer_idx].update(np.unique(non_activated_neurons_L1_layer[:, 2]))
 
             non_activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] <= non_active_THRESHOLD).cpu().numpy()
-            # non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] != 0]
             non_activated_neurons_L2_layer = non_activated_neurons_L2_layer[non_activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
-            non_activated_neurons_L2.append((layer_idx, non_activated_neurons_L2_layer))
-            non_activated_neurons_L2_vis[layer_idx].update(np.unique(non_activated_neurons_L2_layer[:, 2]))
-
-            # Non-activated neurons for both L1 and L2
-            non_activated_neurons_both_L1_L2_layer = np.intersect1d(non_activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
-            non_activated_neurons_all.append((layer_idx, non_activated_neurons_both_L1_L2_layer))
-            non_activated_neurons_all_vis[layer_idx].update(non_activated_neurons_both_L1_L2_layer)
 
             # Shared neurons
             shared_neurons_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], activated_neurons_L2_layer[:, 2])
             shared_neurons.append((layer_idx, shared_neurons_layer))
-            shared_neurons_vis[layer_idx].update(shared_neurons_layer)
-            """ track layer_idx and neuron_idx for analysis """
-            track_dict = extract_neuron_indices(track_dict, layer_idx, shared_neurons_layer)
+            # 発火頻度の保存（layer, neuronごと）
+            for neuron_idx in shared_neurons_layer:
+                act_freq_shared[layer_idx][neuron_idx] += 1
+            # 発火ニューロン数の保存（プロット時に平均算出のため）
+            shared_neurons_vis[sentence_idx][layer_idx] = len(shared_neurons_layer)
 
             # Specific neurons
             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
             specific_neurons_L1.append((layer_idx, specific_neurons_L1_layer))
-            specific_neurons_L1_vis[layer_idx].update(specific_neurons_L1_layer)
+            # 発火頻度の保存（layer, neuronごと）
+            for neuron_idx in specific_neurons_L1_layer:
+                act_freq_L1_only[layer_idx][neuron_idx] += 1
+            # 発火ニューロン数の保存（プロット時に平均算出のため）
+            specific_neurons_L1_vis[sentence_idx][layer_idx] = len(specific_neurons_L1_layer)
 
             specific_neurons_L2_layer = np.intersect1d(activated_neurons_L2_layer[:, 2], non_activated_neurons_L1_layer[:, 2])
             specific_neurons_L2.append((layer_idx, specific_neurons_L2_layer))
-            specific_neurons_L2_vis[layer_idx].update(specific_neurons_L2_layer)
+            # 発火頻度の保存（layer, neuronごと）
+            for neuron_idx in specific_neurons_L2_layer:
+                act_freq_L2_only[layer_idx][neuron_idx] += 1
+            # 発火ニューロン数の保存（プロット時に平均算出のため）
+            specific_neurons_L2_vis[sentence_idx][layer_idx] = len(specific_neurons_L2_layer)
+
+        # increment sentence_idx
+        sentence_idx += 1
 
     # Create output dictionaries
     output_dict = {
         "activated_neurons_L1": activated_neurons_L1,
         "activated_neurons_L2": activated_neurons_L2,
-        "non_activated_neurons_L1": non_activated_neurons_L1,
-        "non_activated_neurons_L2": non_activated_neurons_L2,
         "shared_neurons": shared_neurons,
         "specific_neurons_L1": specific_neurons_L1,
         "specific_neurons_L2": specific_neurons_L2,
-        "non_activated_neurons_all": non_activated_neurons_all
     }
 
+    # 発火ニューロン数
     output_dict_vis = {
         "activated_neurons_L1": activated_neurons_L1_vis,
         "activated_neurons_L2": activated_neurons_L2_vis,
-        "non_activated_neurons_L1": non_activated_neurons_L1_vis,
-        "non_activated_neurons_L2": non_activated_neurons_L2_vis,
         "shared_neurons": shared_neurons_vis,
         "specific_neurons_L1": specific_neurons_L1_vis,
         "specific_neurons_L2": specific_neurons_L2_vis,
-        "non_activated_neurons_all": non_activated_neurons_all_vis
     }
 
-    return output_dict, output_dict_vis, track_dict
+    # 各層の各ニューロンごとの発火頻度
+    freq_dict = {
+        # 発火頻度の保存（層・ニューロンごと）: {layer_idx: neuron_idx: activation_freq}
+        "activated_neurons_L1": act_freq_L1,
+        "activated_neurons_L2": act_freq_L2,
+        "shared_neurons": act_freq_shared,
+        "specific_neurons_L1": act_freq_L1_only,
+        "specific_neurons_L2": act_freq_L2_only,
+    }
+
+    return output_dict, output_dict_vis, freq_dict
 
 """ 発火したニューロンのindexなども追跡 """
 def extract_neuron_indices(track_dict: defaultdict(set), layer_idx: int, activation_layer: np.array):

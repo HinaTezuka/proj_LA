@@ -18,11 +18,11 @@ from visualization_funcs import visualize_neurons_with_line_plot, visualize_neur
 # LLaMA-3
 model_names = {
     # "base": "meta-llama/Meta-Llama-3-8B",
-    # "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
+    "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
     # "de": "DiscoResearch/Llama3-German-8B", # ger
-    "nl": "ReBatch/Llama-3-8B-dutch", # du
-    "it": "DeepMount00/Llama-3-8b-Ita", # ita
-    "ko": "beomi/Llama-3-KoEn-8B", # ko
+    # "nl": "ReBatch/Llama-3-8B-dutch", # du
+    # "it": "DeepMount00/Llama-3-8b-Ita", # ita
+    # "ko": "beomi/Llama-3-KoEn-8B", # ko
 }
 
 L1 = "en" # L1 is fixed to english.
@@ -35,7 +35,7 @@ for L2, model_name in model_names.items():
     """ tatoeba translation corpus """
     dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")
     # select first 100 sentences
-    num_sentences = 2000
+    num_sentences = 10
     dataset = dataset.select(range(num_sentences))
     tatoeba_data = []
     for item in dataset:
@@ -51,8 +51,8 @@ for L2, model_name in model_names.items():
     print(tatoeba_data_base)
 
     """ tracking neurons """
-    neuron_detection_dict, neuron_detection_dict_vis, track_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0.5, 0)
-    neuron_detection_base_dict, neuron_detection_base_dict_vis, track_base_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data_base, 0.5, 0)
+    neuron_detection_dict, neuron_detection_dict_vis, freq_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0, 0)
+    neuron_detection_base_dict, neuron_detection_base_dict_vis, freq_base_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data_base, 0, 0)
 
     # delete some cache
     del model
@@ -62,51 +62,44 @@ for L2, model_name in model_names.items():
     #
     activated_neurons_L1 = neuron_detection_dict["activated_neurons_L1"]
     activated_neurons_L2 = neuron_detection_dict["activated_neurons_L2"]
-    non_activated_neurons_L1 = neuron_detection_dict["non_activated_neurons_L1"]
-    non_activated_neurons_L2 = neuron_detection_dict["non_activated_neurons_L2"]
     shared_neurons = neuron_detection_dict["shared_neurons"]
     specific_neurons_L1 = neuron_detection_dict["specific_neurons_L1"]
     specific_neurons_L2 = neuron_detection_dict["specific_neurons_L2"]
-    non_activated_neurons_all = neuron_detection_dict["non_activated_neurons_all"]
+
     # for visualization
     activated_neurons_L1_vis = neuron_detection_dict_vis["activated_neurons_L1"]
     activated_neurons_L2_vis = neuron_detection_dict_vis["activated_neurons_L2"]
-    non_activated_neurons_L1_vis = neuron_detection_dict_vis["non_activated_neurons_L1"]
-    non_activated_neurons_L2_vis = neuron_detection_dict_vis["non_activated_neurons_L2"]
     shared_neurons_vis = neuron_detection_dict_vis["shared_neurons"]
     specific_neurons_L1_vis = neuron_detection_dict_vis["specific_neurons_L1"]
     specific_neurons_L2_vis = neuron_detection_dict_vis["specific_neurons_L2"]
-    non_activated_neurons_all_vis = neuron_detection_dict_vis["non_activated_neurons_all"]
 
     """ for base line """
     activated_neurons_L1_base = neuron_detection_base_dict["activated_neurons_L1"]
     activated_neurons_L2_base = neuron_detection_base_dict["activated_neurons_L2"]
-    non_activated_neurons_L1_base = neuron_detection_base_dict["non_activated_neurons_L1"]
-    non_activated_neurons_L2_base = neuron_detection_base_dict["non_activated_neurons_L2"]
     shared_neurons_base = neuron_detection_base_dict["shared_neurons"]
     specific_neurons_L1_base = neuron_detection_base_dict["specific_neurons_L1"]
     specific_neurons_L2_base = neuron_detection_base_dict["specific_neurons_L2"]
-    non_activated_neurons_all_base = neuron_detection_base_dict["non_activated_neurons_all"]
     # for visualization
     activated_neurons_L1_base_vis = neuron_detection_base_dict_vis["activated_neurons_L1"]
     activated_neurons_L2_base_vis = neuron_detection_base_dict_vis["activated_neurons_L2"]
-    non_activated_neurons_L1_base_vis = neuron_detection_base_dict_vis["non_activated_neurons_L1"]
-    non_activated_neurons_L2_base_vis = neuron_detection_base_dict_vis["non_activated_neurons_L2"]
     shared_neurons_base_vis = neuron_detection_base_dict_vis["shared_neurons"]
     specific_neurons_L1_base_vis = neuron_detection_base_dict_vis["specific_neurons_L1"]
     specific_neurons_L2_base_vis = neuron_detection_base_dict_vis["specific_neurons_L2"]
-    non_activated_neurons_all_base_vis = neuron_detection_base_dict_vis["non_activated_neurons_all"]
+
+    """ 発火頻度 """
+
+
 
     """ (初回だけ)pickleでfileにshared_neurons(track_dict)を保存 """
-    with open(f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_en_{L2}_tatoeba_05_th.pkl", "wb") as f:
-        pickle.dump(track_dict, f)
-    print("pickle file saved.")
+    # with open(f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_en_{L2}_tatoeba_05_th.pkl", "wb") as f:
+    #     pickle.dump(track_dict, f)
+    # print("pickle file saved.")
 
     """ pickle file(shared_neurons)の解凍/読み込み """
-    with open(f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_en_{L2}_tatoeba_05_th.pkl", "rb") as f:
-        loaded_dict = pickle.load(f)
-    print("unfold pickle")
-    print(loaded_dict)
+    # with open(f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_neurons_en_{L2}_tatoeba_05_th.pkl", "rb") as f:
+    #     loaded_dict = pickle.load(f)
+    # print("unfold pickle")
+    # print(loaded_dict)
     # sys.exit()
 
 
