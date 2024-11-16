@@ -79,8 +79,8 @@ model_names = {
 
 # load BLiMP
 # BLiMPの評価項目リスト
-# configs = get_dataset_config_names("blimp")
-configs = configs[:10]
+configs = get_dataset_config_names("blimp")
+configs = configs[:2]
 # データを保存するリスト
 results = []
 
@@ -118,8 +118,8 @@ def eval_blimp(model_names, layer_neuron_list):
 if __name__ == "__main__":
     result_main = eval_blimp(model_names, layer_neuron_list)
     result_comp = eval_blimp(model_names, complement_list)
-    # print(result_main)
-    # print(result_comp)
+    print(result_main)
+    print(result_comp)
 
     # データフレームに変換
     df_main = pd.DataFrame(result_main)
