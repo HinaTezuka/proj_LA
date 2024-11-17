@@ -61,8 +61,8 @@ for L2, model_name in model_names.items():
         en_base_ds_idx += 1
 
     """ tracking neurons """
-    neuron_detection_dict, neuron_detection_dict_vis, freq_dict, act_sum_shared_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0, 0)
-    _, neuron_detection_base_dict_vis, _, _ = track_neurons_with_text_data(model, 'llama', tokenizer, random_data, 0, 0)
+    neuron_detection_dict, neuron_detection_dict_vis, freq_dict, act_sum_dict = track_neurons_with_text_data(model, 'llama', tokenizer, tatoeba_data, 0, 0)
+    # _, neuron_detection_base_dict_vis, _, _ = track_neurons_with_text_data(model, 'llama', tokenizer, random_data, 0, 0)
 
     # delete some cache
     del model
@@ -88,25 +88,31 @@ for L2, model_name in model_names.items():
 
     """ for base line """
     # for visualization
-    activated_neurons_L1_base_vis = neuron_detection_base_dict_vis["activated_neurons_L1"]
-    activated_neurons_L2_base_vis = neuron_detection_base_dict_vis["activated_neurons_L2"]
-    shared_neurons_base_vis = neuron_detection_base_dict_vis["shared_neurons"]
-    specific_neurons_L1_base_vis = neuron_detection_base_dict_vis["specific_neurons_L1"]
-    specific_neurons_L2_base_vis = neuron_detection_base_dict_vis["specific_neurons_L2"]
+    # activated_neurons_L1_base_vis = neuron_detection_base_dict_vis["activated_neurons_L1"]
+    # activated_neurons_L2_base_vis = neuron_detection_base_dict_vis["activated_neurons_L2"]
+    # shared_neurons_base_vis = neuron_detection_base_dict_vis["shared_neurons"]
+    # specific_neurons_L1_base_vis = neuron_detection_base_dict_vis["specific_neurons_L1"]
+    # specific_neurons_L2_base_vis = neuron_detection_base_dict_vis["specific_neurons_L2"]
 
     """ 発火頻度dict """
-    freq_L1 = freq_dict["activated_neurons_L1"]
-    freq_L2 = freq_dict["activated_neurons_L2"]
-    freq_shared = freq_dict["shared_neurons"]
-    freq_L1_only = freq_dict["specific_neurons_L1"]
-    freq_L2_only = freq_dict["specific_neurons_L2"]
+    # freq_L1 = freq_dict["activated_neurons_L1"]
+    # freq_L2 = freq_dict["activated_neurons_L2"]
+    # freq_shared = freq_dict["shared_neurons"]
+    # freq_L1_only = freq_dict["specific_neurons_L1"]
+    # freq_L2_only = freq_dict["specific_neurons_L2"]
+
+    """ 発火値の合計dict """
+    # sum_shared = act_sum_dict["shared"]
+    # sum_L1_or_L2 = act_sum_dict["L1_or_L2"]
+    # sum_L1_specific = act_sum_dict["L1_specific"]
+    # sum_L1_specific = act_sum_dict["L2_specific"]
 
     """ (初回だけ)pickleでfileにshared_neurons(track_dict)を保存 """
-    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/shared_neurons_en_{L2}_tatoeba_0_th.pkl"
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_{L2}_tatoeba_0_th.pkl"
     # directoryを作成（存在しない場合のみ)
     os.makedirs(os.path.dirname(pkl_file_path), exist_ok=True)
     with open(pkl_file_path, "wb") as f:
-        pickle.dump(act_sum_shared_dict, f)
+        pickle.dump(act_sum_dict, f)
     print("pickle file saved.")
 
     """ pickle file(shared_neurons)の解凍/読み込み """

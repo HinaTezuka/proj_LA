@@ -73,7 +73,7 @@ def edit_activation(output, layer, layer_idx_and_neuron_idx):
 
     return output
 
-def evaluate_sentence_pair(model, tokenizer, layer_neuron_list, sentence1, sentence2):
+def evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_list, sentence1, sentence2):
     inputs1 = tokenizer(sentence1, return_tensors="pt")
     inputs2 = tokenizer(sentence2, return_tensors="pt")
 

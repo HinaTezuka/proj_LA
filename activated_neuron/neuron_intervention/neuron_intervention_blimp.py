@@ -15,9 +15,16 @@ from baukit import Trace, TraceDict
 from datasets import get_dataset_config_names, load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-from neuron_intervention_funcs import edit_activation, evaluate_sentence_pair, get_complement, has_overlap
+from neuron_intervention_funcs import evaluate_sentence_pair_with_edit_activation, get_complement, has_overlap
 
-""" load pkl_file(act_freq_dict) """
+""" load pkl_file(act_sum_dict) """
+# en_ja
+# pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_ja_tatoeba_0_th.pkl"
+# with open(pkl_file_path, "rb") as f:
+#     act_sum_dict = pickle.load(f)
+# print("unfolded pickle")
+
+""" load pkl_file(act_sum_SHARED_dict) """
 # en_ja
 pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/shared_neurons_en_ja_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
@@ -52,17 +59,33 @@ all_layers = range(num_layers)
 all_neurons = range(num_neurons_per_layer)
 # 補集合の生成
 complement_list = get_complement(all_layers, all_neurons, layer_neuron_list)
+
 # 重複がないかテスト
 # print(has_overlap(layer_neuron_list, complement_list)) # False
 # sys.exit()
 
-# test
-# print("Tuple List (act_sum順):", tuple_list[:1000])
-# print("Layer-Neuron List (act_sum順):", layer_neuron_list)
-
 # どのくらい介入するか
-layer_neuron_list = layer_neuron_list[:2000]
-complement_list = complement_list[:2000]
+intervention_num = 3000
+layer_neuron_list = layer_neuron_list[:intervention_num]
+complement_list = complement_list[:intervention_num]
+# print(layer_neuron_list[:10])
+# print(complement_list[:10])
+# sys.exit()
+"""
+上で作成したリストから、指定した範囲の（特定の）layer_idxのみを保持するリストを作成
+（特定の層の影響を調べるため。
+"""
+# layer range
+# layer_range = range(10, 16)  # 10〜15　
+
+# 範囲内のlayer_idxに対応するサブリストを作成
+# sublist_main = [pair for pair in layer_neuron_list if pair[0] in layer_range]
+# sublist_comp = [pair for pair in complement_list if pair[0] in layer_range]
+# print(sublist_main)
+# print(len(sublist_main))
+# print(sublist_comp[:len(sublist_main)])
+# print(len(sublist_comp[:len(sublist_main)]))
+# sys.exit()
 
 """ neuron intervention (発火値の改竄実験)"""
 
@@ -80,11 +103,13 @@ model_names = {
 # load BLiMP
 # BLiMPの評価項目リスト
 configs = get_dataset_config_names("blimp")
-configs = configs[:2]
+# configs = ["npi_present_1"]
+# configs = configs[:1]
+# sys.exit()
 # データを保存するリスト
-results = []
 
 def eval_blimp(model_names, layer_neuron_list):
+    results = []
     # 各モデルについてBLiMPのタスクを評価
     for L2, model_name in model_names.items():
         # load model and tokenizer
@@ -96,11 +121,14 @@ def eval_blimp(model_names, layer_neuron_list):
             blimp = load_dataset("blimp", config)
             correct = 0
             total = 0
-
+            # c = 0
             for example in blimp["train"]:
                 sentence1 = example["sentence_good"]
                 sentence2 = example["sentence_bad"]
-                score1, score2 = evaluate_sentence_pair(model, tokenizer, layer_neuron_list, sentence1, sentence2)
+                score1, score2 = evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_list, sentence1, sentence2)
+                # print(score1, score2)
+                # c += 1
+                # if c == 10: break
 
                 if score1 > score2:
                     correct += 1
@@ -118,6 +146,7 @@ def eval_blimp(model_names, layer_neuron_list):
 if __name__ == "__main__":
     result_main = eval_blimp(model_names, layer_neuron_list)
     result_comp = eval_blimp(model_names, complement_list)
+    # sys.exit()
     print(result_main)
     print(result_comp)
 
@@ -134,10 +163,11 @@ if __name__ == "__main__":
     print(overall_accuracy_comp)
 
     # 列名を変更してOVERALLにします
-    overall_accuracy.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    overall_accuracy_main.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
     # CSVに保存
-    df_main.to_csv("/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/n_2000/ja/blimp_eval_llama3_en_ja.csv", index=False)
-    df_main.to_csv("/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/n_2000/ja/blimp_eval_llama3_en_ja_COMP.csv", index=False)
+    df_main.to_csv("/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/n_3000/ja/blimp_eval_llama3_en_ja.csv", index=False)
+    df_comp.to_csv("/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/n_3000/ja/blimp_eval_llama3_en_ja_COMP.csv", index=False)
 
     print("評価結果をcsv fileに保存しました。")

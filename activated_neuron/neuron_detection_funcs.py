@@ -213,6 +213,10 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
 
     # 発火値の合計の保存（層・ニューロンごと）: {layer_idx: neuron_idx: activation_values_sum}
     act_sum_shared = defaultdict(lambda: defaultdict(float))
+    act_sum_L1_or_L2 = defaultdict(lambda: defaultdict(float))
+    act_sum_L1_specific = defaultdict(lambda: defaultdict(float))
+    act_sum_L2_specific = defaultdict(lambda: defaultdict(float))
+
     # Track neurons with tatoeba
     for L1_text, L2_text in data:
         """
@@ -271,13 +275,25 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
                 act_freq_shared[layer_idx][neuron_idx] += 1
             # 発火ニューロン数の保存（プロット時に平均算出のため）
             shared_neurons_vis[layer_idx].append(len(shared_neurons_layer))
-            """ 発火値の累計（合計）を取得・保存 """
+            """ L1, L2どちらかには発火はしているけど、L1/L2のshared neuronsではないneuronsを取得 (L1_actとL2_actの和集合 - L1/L2のshared neurons） """
+            # L1, L2それぞれに発火しているニューロンの和集合
+            union_act_L1_L2_layer = np.union1d(activated_neurons_L1_layer[:, 2], activated_neurons_L2_layer[:, 2])
+            # つくった和集合から shared neuronsを取り除く
+            act_L1_or_L2_neurons_layer = np.setdiff1d(union_act_L1_L2_layer, shared_neurons_layer)
+            """ 発火値の累計（合計）を取得・保存(shared_neurons, act_L1_or_L2_neurons) """
             # L1/L2双方の発火値を平均して、そのlayer_idx, neuron_idxの発火値とする
+            # act_sum_shared
             for neuron_idx in shared_neurons_layer:
                 act_value_L1 = get_activation_value(mlp_activation_L1, layer_idx, neuron_idx, token_len_L1-1)
                 act_value_L2 = get_activation_value(mlp_activation_L2, layer_idx, neuron_idx, token_len_L2-1)
                 act_value = (act_value_L1 + act_value_L2) / 2
                 act_sum_shared[layer_idx][neuron_idx] += act_value
+            # act_sum_L1_or_L2
+            for neuron_idx in act_L1_or_L2_neurons_layer:
+                act_value_L1 = get_activation_value(mlp_activation_L1, layer_idx, neuron_idx, token_len_L1-1)
+                act_value_L2 = get_activation_value(mlp_activation_L2, layer_idx, neuron_idx, token_len_L2-1)
+                act_value = (act_value_L1 + act_value_L2) / 2
+                act_sum_L1_or_L2[layer_idx][neuron_idx] += act_value
 
             # Specific neurons
             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
@@ -295,6 +311,15 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
                 act_freq_L2_only[layer_idx][neuron_idx] += 1
             # 発火ニューロン数の保存（プロット時に平均算出のため）
             specific_neurons_L2_vis[layer_idx].append(len(specific_neurons_L2_layer))
+            """ 発火値の累計（合計）を取得・保存(L1_specific_neurons, L2_specific_neurons) """
+            # L1 specific
+            for neuron_idx in specific_neurons_L1_layer:
+                act_value_L1 = get_activation_value(mlp_activation_L1, layer_idx, neuron_idx, token_len_L1-1)
+                act_sum_L1_specific[layer_idx][neuron_idx] += act_value_L1
+            # L2 specific
+            for neuron_idx in specific_neurons_L2_layer:
+                act_value_L2 = get_activation_value(mlp_activation_L2, layer_idx, neuron_idx, token_len_L2-1)
+                act_sum_L2_specific[layer_idx][neuron_idx] += act_value_L2
 
         # increment sentence_idx
         sentence_idx += 1
@@ -307,7 +332,6 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         "specific_neurons_L1": specific_neurons_L1,
         "specific_neurons_L2": specific_neurons_L2,
     }
-
     # 各文ペア、各層、各ニューロンの発火ニューロン数
     output_dict_vis = {
         "activated_neurons_L1": activated_neurons_L1_vis,
@@ -316,7 +340,6 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         "specific_neurons_L1": specific_neurons_L1_vis,
         "specific_neurons_L2": specific_neurons_L2_vis,
     }
-
     # 各層の各ニューロンごとの発火頻度
     freq_dict = {
         # 発火頻度の保存（層・ニューロンごと）: {layer_idx: neuron_idx: activation_freq}
@@ -326,8 +349,15 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         "specific_neurons_L1": act_freq_L1_only,
         "specific_neurons_L2": act_freq_L2_only,
     }
+    # 各層の各ニューロンごとの発火値合計
+    act_sum_dict = {
+        "shared": act_sum_shared,
+        "L1_or_L2": act_sum_L1_or_L2,
+        "L1_specific": act_sum_L1_specific,
+        "L2_specific": act_sum_L2_specific,
+    }
 
-    return output_dict, output_dict_vis, freq_dict, act_sum_shared
+    return output_dict, output_dict_vis, freq_dict, act_sum_dict
 
 def get_activation_value(mlp_activations, layer_idx, neuron_idx, token_idx):
     """
