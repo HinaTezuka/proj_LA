@@ -74,8 +74,8 @@ def edit_activation(output, layer, layer_idx_and_neuron_idx):
     return output
 
 def evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_list, sentence1, sentence2):
-    inputs1 = tokenizer(sentence1, return_tensors="pt")
-    inputs2 = tokenizer(sentence2, return_tensors="pt")
+    inputs1 = tokenizer(sentence1, return_tensors="pt").to("cuda")
+    inputs2 = tokenizer(sentence2, return_tensors="pt").to("cuda")
 
     # 指定したニューロンの発火値を改竄した上で対数確率を計算
     trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_neuron_list]
