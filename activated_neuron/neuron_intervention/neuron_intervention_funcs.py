@@ -80,19 +80,10 @@ def evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_l
     # 指定したニューロンの発火値を改竄した上で対数確率を計算
     trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_neuron_list]
     with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_neuron_list)) as tr:
-        # input_t = 'こんにちは。今日は'
-        # input_ids = tokenizer(input_t, return_tensors="pt")
-        # # モデル推論
-        # output = model.generate(input_ids["input_ids"])
-        # print(tokenizer.decode(output[0], skip_special_tokens=True))
-        # sys.exit()
-
         # logitsを取得
         with torch.no_grad():
             outputs1 = model(**inputs1)
             outputs2 = model(**inputs2)
-        # print(outputs1)
-        # sys.exit()
 
     # 文1の対数確率をトークンごとに取得して平均
     log_probs1 = outputs1.logits.log_softmax(dim=-1)

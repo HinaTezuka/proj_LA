@@ -17,17 +17,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from neuron_intervention_funcs import evaluate_sentence_pair_with_edit_activation, get_complement, has_overlap
 
-""" load pkl_file(act_sum_SHARED_dict) """
-# en_ja
-# pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/shared_neurons_en_ja_tatoeba_0_th.pkl"
-# with open(pkl_file_path, "rb") as f:
-#     act_sum_dict = pickle.load(f)
-# print("unfolded pickle")
-
-# act_sum_dict["shared"]でちゃんとshared neuronsの発火値の合計がとれているか確認
-# print(act_sum_dict["shared"] == act_sum_dict1) # True
-# sys.exit()
-
 """ load pkl_file(act_sum_dict) """
 # en_ja
 pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_ja_tatoeba_0_th.pkl"
@@ -38,7 +27,7 @@ print("unfolded pickle")
 # それぞれのneuronsの発火値の合計（dict)を取得
 act_sum_shared = act_sum_dict["shared"]
 act_sum_L1_or_L2 = act_sum_dict["L1_or_L2"]
-act_sum_L1_specific = act_sum_dict["L1_specific"]
+act_sum_L2_specific = act_sum_dict["L1_specific"]
 act_sum_L2_specific = act_sum_dict["L2_specific"]
 
 """
@@ -93,29 +82,29 @@ layer_neuron_list_L1_or_L2 = sorted(layer_neuron_list_L1_or_L2, key=lambda x: ac
 
 """ L1のみに発火しているニューロンの中から、layer_neuron_listの補集合を作成 """
 # ちゃんと降順にとれている確認用に、(layer_idx, neuron_idx, sum_of_act_values)を表示
-# layer_neuron_list_L1_specific = []
-# for layer_idx, neurons in act_sum_L1_specific.items():
+# layer_neuron_list_L2_specific = []
+# for layer_idx, neurons in act_sum_L2_specific.items():
 #     for neuron_idx, act_sum in neurons.items():
 #         layer_neuron_list_L1_specific.append((layer_idx, neuron_idx, act_sum))
-# layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda x: x[2], reverse=True)
+# layer_neuron_list_L2_specific = sorted(layer_neuron_list_L2_specific, key=lambda x: x[2], reverse=True)
 # print(layer_neuron_list_L1_specific[:10])
 
-layer_neuron_list_L1_specific = []
-for layer_idx, neurons in act_sum_L1_specific.items():
+layer_neuron_list_L2_specific = []
+for layer_idx, neurons in act_sum_L2_specific.items():
     for neuron_idx in neurons.keys():
-        layer_neuron_list_L1_specific.append((layer_idx, neuron_idx))
-layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda x: act_sum_L1_specific[x[0]][x[1]], reverse=True)
+        layer_neuron_list_L2_specific.append((layer_idx, neuron_idx))
+layer_neuron_list_L2_specific = sorted(layer_neuron_list_L2_specific, key=lambda x: act_sum_L2_specific[x[0]][x[1]], reverse=True)
 # print(layer_neuron_list_L1_specific[:10])
 # sys.exit()
 
 # どのくらい介入するか(n)
-intervention_num = 1500
+intervention_num = 3000
 layer_neuron_list = layer_neuron_list[:intervention_num]
 complement_list = complement_list[:intervention_num]
 # L1かL2の発火している、layer_neuron_listの補集合
 layer_neuron_list_L1_or_L2 = layer_neuron_list_L1_or_L2[:intervention_num]
 # L1_specific
-layer_neuron_list_L1_specific = layer_neuron_list_L1_specific[:intervention_num]
+layer_neuron_list_L2_specific = layer_neuron_list_L2_specific[:intervention_num]
 # print(layer_neuron_list[:10])
 # print(complement_list[:10])
 # sys.exit()
@@ -139,69 +128,54 @@ layer_neuron_list_L1_specific = layer_neuron_list_L1_specific[:intervention_num]
 
 """ models """
 # LLaMA-3
-model_names = {
-    # "base": "meta-llama/Meta-Llama-3-8B"
-    "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
-    # "de": "DiscoResearch/Llama3-German-8B", # ger
-    # "nl": "ReBatch/Llama-3-8B-dutch", # du
-    # "it": "DeepMount00/Llama-3-8b-Ita", # ita
-    # "ko": "beomi/Llama-3-KoEn-8B", # ko
-}
+model_name = "tokyotech-llm/Llama-3-Swallow-8B-v0.1"
+# JBLiMP
+jblimp = load_dataset("polm-stability/jblimp")
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# load BLiMP
-# BLiMPの評価項目リスト
-configs = get_dataset_config_names("blimp")
-# configs = ["npi_present_1"]
-# configs = ["existential_there_quantifiers_2", "matrix_question_npi_licensor_present"]
-# configs = ["existential_there_quantifiers_2"]
-# configs = configs[:2]
-# sys.exit()
-# データを保存するリスト
-
-def eval_blimp(model_names, layer_neuron_list):
+def eval_jblimp(model_names, layer_neuron_list):
     results = []
-    # 各モデルについてBLiMPのタスクを評価
-    for L2, model_name in model_names.items():
-        # load model and tokenizer
-        model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    predictions = defaultdict(lambda: defaultdict(int))
+    model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-        # 各評価項目ごとに評価
-        for config in configs:
-            blimp = load_dataset("blimp", config)
-            correct = 0
-            total = 0
-            c = 0
-            for example in blimp["train"]:
-                sentence1 = example["sentence_good"]
-                sentence2 = example["sentence_bad"]
-                score1, score2 = evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_list, sentence1, sentence2)
-                # print(score1, score2)
-                # c += 1
-                # if c == 10: break
+    for example in jblimp["train"]:
+        task_name = example["phenomenon"]
+        sentence1 = example["good_sentence"]
+        sentence2 = example["bad_sentence"]
+        score1, score2 = evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_list, sentence1, sentence2)
+        if score1 > score2:
+            predictions[task_name]["correct"] += 1
+        predictions[task_name]["total"] += 1
 
-                if score1 > score2:
-                    correct += 1
-                total += 1
+    # 精度を計算して結果を保存
+    for task_name, scores in predictions.items():
+        results.append({
+            "Model": model_name,
+            "Task": task_name,
+            "Accuracy": scores["correct"] / scores["total"]
+        })
 
-            # 精度を計算して結果を保存
-            accuracy = correct / total
-            results.append({
-                "Model": model_name,
-                "Task": config,
-                "Accuracy": accuracy
-            })
     return results
 
 if __name__ == "__main__":
-    result_main = eval_blimp(model_names, layer_neuron_list)
+    results = []
+    """
+    predictions:
+    {
+    "task_name":
+            "total": num_of_total_sentence(int)
+            "correct": num_of_correct_predictions(int)
+    }
+    """
+    result_main = eval_jblimp(model_name, layer_neuron_list)
     print(f"result_main: {result_main}")
-    result_comp = eval_blimp(model_names, complement_list)
+    result_comp = eval_jblimp(model_name, complement_list)
     print(f"result_comp: {result_comp}")
-    result_comp_L1_or_L2 = eval_blimp(model_names, layer_neuron_list_L1_or_L2)
+    result_comp_L1_or_L2 = eval_jblimp(model_name, layer_neuron_list_L1_or_L2)
     print(f"result_comp_L1_or_L2: {result_comp_L1_or_L2}")
-    result_comp_L1_specific = eval_blimp(model_names, layer_neuron_list_L1_specific)
-    print(f"result_comp_L1_specific: {result_comp_L1_specific}")
+    result_comp_L2_specific = eval_jblimp(model_name, layer_neuron_list_L2_specific)
+    print(f"result_comp_L1_specific: {result_comp_L2_specific}")
 
     # sys.exit()
 
@@ -212,8 +186,8 @@ if __name__ == "__main__":
     print(df_comp)
     df_comp_L1_or_L2 = pd.DataFrame(result_comp_L1_or_L2)
     print(df_comp_L1_or_L2)
-    df_comp_L1_specific = pd.DataFrame(result_comp_L1_specific)
-    print(df_comp_L1_specific)
+    df_comp_L2_specific = pd.DataFrame(result_comp_L2_specific)
+    print(df_comp_L2_specific)
 
     # 各モデルごとに正答率の平均を計算
     overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
@@ -222,23 +196,23 @@ if __name__ == "__main__":
     print(overall_accuracy_comp)
     overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
     print(overall_accuracy_comp_L1_or_L2)
-    overall_accuracy_comp_L1_specific = df_comp_L1_specific.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp_L1_specific)
+    overall_accuracy_comp_L2_specific = df_comp_L2_specific.groupby('Model')['Accuracy'].mean().reset_index()
+    print(overall_accuracy_comp_L2_specific)
 
     # 列名を変更してOVERALLにします
     overall_accuracy_main.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     overall_accuracy_comp_L1_or_L2.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    overall_accuracy_comp_L2_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
     """ CSVに保存 """
     # shared_neurons intervention
-    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared.csv", index=False)
+    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/jblimp/shared/n_{intervention_num}/llama3_en_ja.csv", index=False)
     # COMPLEMENT of shared_neurons intervention
-    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
+    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/jblimp/normal_COMP/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
     # act_L1_or_L2 intervention
-    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
+    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/jblimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
     # L1_specific intervention
-    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
+    df_comp_L2_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/jblimp/L2_specific/n_{intervention_num}/llama3_en_ja_L2_specific.csv", index=False)
 
     print("completed. saved to csv.")
