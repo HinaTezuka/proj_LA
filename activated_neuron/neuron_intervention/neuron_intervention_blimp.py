@@ -92,48 +92,43 @@ for layer_idx, neurons in act_sum_L1_or_L2.items():
 layer_neuron_list_L1_or_L2 = sorted(layer_neuron_list_L1_or_L2, key=lambda x: act_sum_L1_or_L2[x[0]][x[1]], reverse=True)
 
 """ L1のみに発火しているニューロンの中から、layer_neuron_listの補集合を作成 """
-# ちゃんと降順にとれている確認用に、(layer_idx, neuron_idx, sum_of_act_values)を表示
-# layer_neuron_list_L1_specific = []
-# for layer_idx, neurons in act_sum_L1_specific.items():
-#     for neuron_idx, act_sum in neurons.items():
-#         layer_neuron_list_L1_specific.append((layer_idx, neuron_idx, act_sum))
-# layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda x: x[2], reverse=True)
-# print(layer_neuron_list_L1_specific[:10])
-
 layer_neuron_list_L1_specific = []
 for layer_idx, neurons in act_sum_L1_specific.items():
     for neuron_idx in neurons.keys():
         layer_neuron_list_L1_specific.append((layer_idx, neuron_idx))
 layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda x: act_sum_L1_specific[x[0]][x[1]], reverse=True)
-# print(layer_neuron_list_L1_specific[:10])
-# sys.exit()
 
-# どのくらい介入するか(n)
-intervention_num = 1500
+""" どのくらい介入するか(n) """
+intervention_num = 10000
 layer_neuron_list = layer_neuron_list[:intervention_num]
 complement_list = complement_list[:intervention_num]
-# L1かL2の発火している、layer_neuron_listの補集合
 layer_neuron_list_L1_or_L2 = layer_neuron_list_L1_or_L2[:intervention_num]
-# L1_specific
 layer_neuron_list_L1_specific = layer_neuron_list_L1_specific[:intervention_num]
-# print(layer_neuron_list[:10])
-# print(complement_list[:10])
-# sys.exit()
+
 """
 上で作成したリストから、指定した範囲の（特定の）layer_idxのみを保持するリストを作成
 （特定の層の影響を調べるため。
 """
 # layer range
-# layer_range = range(10, 16)  # 10〜15　
+# layer_range = range(4, 13)  # 10〜20
 
-# 範囲内のlayer_idxに対応するサブリストを作成
-# sublist_main = [pair for pair in layer_neuron_list if pair[0] in layer_range]
-# sublist_comp = [pair for pair in complement_list if pair[0] in layer_range]
-# print(sublist_main)
-# print(len(sublist_main))
-# print(sublist_comp[:len(sublist_main)])
-# print(len(sublist_comp[:len(sublist_main)]))
+# # 範囲内のlayer_idxに対応するサブリストを作成
+# layer_neuron_list = [pair for pair in layer_neuron_list if pair[0] in layer_range]
+# complement_list = [pair for pair in complement_list if pair[0] in layer_range]
+# layer_neuron_list_L1_or_L2 = [pair for pair in layer_neuron_list_L1_or_L2 if pair[0] in layer_range]
+# layer_neuron_list_L1_specific = [pair for pair in layer_neuron_list_L1_specific if pair[0] in layer_range]
+
+# layer_neuron_list = layer_neuron_list[:intervention_num]
+# complement_list = complement_list[:intervention_num]
+# layer_neuron_list_L1_or_L2 = layer_neuron_list_L1_or_L2[:intervention_num]
+# layer_neuron_list_L1_specific = layer_neuron_list_L1_specific[:intervention_num]
+
+# print(layer_neuron_list)
+# print(complement_list)
+# print(layer_neuron_list_L1_or_L2)
+# print(layer_neuron_list_L1_specific)
 # sys.exit()
+
 
 """ neuron intervention (発火値の改竄実験)"""
 
@@ -171,7 +166,7 @@ def eval_blimp(model_names, layer_neuron_list):
             blimp = load_dataset("blimp", config)
             correct = 0
             total = 0
-            c = 0
+            # c = 0
             for example in blimp["train"]:
                 sentence1 = example["sentence_good"]
                 sentence2 = example["sentence_bad"]
@@ -232,6 +227,7 @@ if __name__ == "__main__":
     overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
     """ CSVに保存 """
+    """ all layers """
     # shared_neurons intervention
     df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared.csv", index=False)
     # COMPLEMENT of shared_neurons intervention
@@ -240,5 +236,16 @@ if __name__ == "__main__":
     df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
     # L1_specific intervention
     df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
+    """ mid layers """
+    # shared_neurons intervention
+    # df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/midlayers/n_{intervention_num}/llama3_en_ja_shared.csv", index=False)
+    # # COMPLEMENT of shared_neurons intervention
+    # df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/midlayers/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
+    # # act_L1_or_L2 intervention
+    # df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/midlayers/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
+    # # L1_specific intervention
+    # df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/midlayers/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
 
+    print(f"intervention num: {intervention_num}")
+    # print(f"layer_range: {layer_range}")
     print("completed. saved to csv.")

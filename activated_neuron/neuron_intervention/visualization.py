@@ -23,4 +23,3 @@ acc_overall_L1_specific = df_L1_specific.groupby('Model')['Accuracy'].mean().res
 acc_overall_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 print(acc_overall_L1_specific)
 
-

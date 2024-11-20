@@ -9,11 +9,12 @@ import pandas as pd
 # 使用するモデル名のリスト
 model_names = [
                 # llama3-8b
-                "meta-llama/Meta-Llama-3-8B", # en
-                "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
-                "DiscoResearch/Llama3-German-8B", # ger
-                "DeepMount00/Llama-3-8b-Ita", # ita
-                "beomi/Llama-3-KoEn-8B", # ko
+                # "meta-llama/Meta-Llama-3-8B", # en
+                # "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
+                # "DiscoResearch/Llama3-German-8B", # ger
+                # "DeepMount00/Llama-3-8b-Ita", # ita
+                # "beomi/Llama-3-KoEn-8B", # ko
+                "ReBatch/Llama-3-8B-dutch", # du
               ]
 
 # BLiMPの評価項目リスト
@@ -42,8 +43,8 @@ configs = get_dataset_config_names("blimp")
 
 #     return score1, score2
 def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
-    inputs1 = tokenizer(sentence1, return_tensors="pt")
-    inputs2 = tokenizer(sentence2, return_tensors="pt")
+    inputs1 = tokenizer(sentence1, return_tensors="pt").to("cuda")
+    inputs2 = tokenizer(sentence2, return_tensors="pt").to("cuda")
 
     with torch.no_grad():
         outputs1 = model(**inputs1)
@@ -73,7 +74,7 @@ results = []
 # 各モデルについてBLiMPのタスクを評価
 for model_name in model_names:
     # モデルとトークナイザーをロード
-    model = AutoModelForCausalLM.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # 各評価項目ごとに評価
@@ -105,6 +106,6 @@ print(df)
 
 # print(df)
 # CSVに保存
-df.to_csv("blimp_evaluation_results_complete2_llama3_all_fina_en_ja.csv", index=False)
+df.to_csv("/home/s2410121/proj_LA/gpt2-small_blimp/csv_files_final/llam3_en_du.csv", index=False)
 
 print("評価結果をcsv fileに保存しました。")
