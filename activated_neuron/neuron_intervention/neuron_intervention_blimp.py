@@ -17,17 +17,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from neuron_intervention_funcs import evaluate_sentence_pair_with_edit_activation, get_complement, has_overlap
 
-""" load pkl_file(act_sum_SHARED_dict) """
-# en_ja
-# pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/shared_neurons_en_ja_tatoeba_0_th.pkl"
-# with open(pkl_file_path, "rb") as f:
-#     act_sum_dict = pickle.load(f)
-# print("unfolded pickle")
-
-# act_sum_dict["shared"]でちゃんとshared neuronsの発火値の合計がとれているか確認
-# print(act_sum_dict["shared"] == act_sum_dict1) # True
-# sys.exit()
-
 """ load pkl_file(act_sum_dict) """
 # en_ja
 pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_ja_tatoeba_0_th.pkl"
@@ -99,7 +88,7 @@ for layer_idx, neurons in act_sum_L1_specific.items():
 layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda x: act_sum_L1_specific[x[0]][x[1]], reverse=True)
 
 """ どのくらい介入するか(n) """
-intervention_num = 10000
+intervention_num = 15000
 layer_neuron_list = layer_neuron_list[:intervention_num]
 complement_list = complement_list[:intervention_num]
 layer_neuron_list_L1_or_L2 = layer_neuron_list_L1_or_L2[:intervention_num]
@@ -109,8 +98,8 @@ layer_neuron_list_L1_specific = layer_neuron_list_L1_specific[:intervention_num]
 上で作成したリストから、指定した範囲の（特定の）layer_idxのみを保持するリストを作成
 （特定の層の影響を調べるため。
 """
-# layer range
-# layer_range = range(4, 13)  # 10〜20
+# # layer range
+# layer_range = range(4, 13)  # 4-13
 
 # # 範囲内のlayer_idxに対応するサブリストを作成
 # layer_neuron_list = [pair for pair in layer_neuron_list if pair[0] in layer_range]
@@ -237,15 +226,15 @@ if __name__ == "__main__":
     # L1_specific intervention
     df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
     """ mid layers """
-    # shared_neurons intervention
+    # # shared_neurons intervention
     # df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/midlayers/n_{intervention_num}/llama3_en_ja_shared.csv", index=False)
     # # COMPLEMENT of shared_neurons intervention
     # df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/midlayers/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
     # # act_L1_or_L2 intervention
-    # df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/midlayers/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
+    # df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/midlayers/n_{intervention_num}/llama3_ja_ko_L1_or_L2.csv", index=False)
     # # L1_specific intervention
     # df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/midlayers/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
 
     print(f"intervention num: {intervention_num}")
-    # print(f"layer_range: {layer_range}")
+    print(f"layer_range: {layer_range}")
     print("completed. saved to csv.")
