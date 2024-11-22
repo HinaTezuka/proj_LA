@@ -99,7 +99,7 @@ layer_neuron_list_L1_specific = layer_neuron_list_L1_specific[:intervention_num]
 （特定の層の影響を調べるため。
 """
 # # layer range
-# layer_range = range(4, 13)  # 4-13
+# layer_range = range(10, 21)  # 10~20
 
 # # 範囲内のlayer_idxに対応するサブリストを作成
 # layer_neuron_list = [pair for pair in layer_neuron_list if pair[0] in layer_range]
