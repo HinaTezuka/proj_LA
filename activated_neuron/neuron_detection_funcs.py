@@ -254,10 +254,10 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
             activated_neurons_L2_layer = torch.nonzero(mlp_activation_L2[layer_idx] > active_THRESHOLD).cpu().numpy()
             activated_neurons_L2_layer = activated_neurons_L2_layer[activated_neurons_L2_layer[:, 1] == token_len_L2 - 1]
             activated_neurons_L2.append((layer_idx, activated_neurons_L2_layer))
-            # 発火頻度の保存（layer, neuronごと）
+            """ 発火頻度の保存（layer, neuronごと） """
             for neuron_idx in activated_neurons_L2_layer[:, 2]:
                 act_freq_L2[layer_idx][neuron_idx] += 1
-            # 発火ニューロン数の保存（プロット時に平均算出のため）
+            # 発火ニューロン数の保存（プロット時に平均算出のため） <- 可視化用
             activated_neurons_L2_vis[layer_idx].append(len(activated_neurons_L2_layer[:, 2]))
 
             # Non-activated neurons for L1 and L2(shared neuronsの算出のために必要)
@@ -270,7 +270,7 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
             # Shared neurons
             shared_neurons_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], activated_neurons_L2_layer[:, 2])
             shared_neurons.append((layer_idx, shared_neurons_layer))
-            # 発火頻度の保存（layer, neuronごと）
+            """ 発火頻度の保存（layer, neuronごと） """
             for neuron_idx in shared_neurons_layer:
                 act_freq_shared[layer_idx][neuron_idx] += 1
             # 発火ニューロン数の保存（プロット時に平均算出のため）
@@ -298,7 +298,8 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
             # Specific neurons
             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
             specific_neurons_L1.append((layer_idx, specific_neurons_L1_layer))
-            # 発火頻度の保存（layer, neuronごと）
+            """ 発火頻度の保存（layer, neuronごと） """
+            # L1 only
             for neuron_idx in specific_neurons_L1_layer:
                 act_freq_L1_only[layer_idx][neuron_idx] += 1
             # 発火ニューロン数の保存（プロット時に平均算出のため）
@@ -306,7 +307,8 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
 
             specific_neurons_L2_layer = np.intersect1d(activated_neurons_L2_layer[:, 2], non_activated_neurons_L1_layer[:, 2])
             specific_neurons_L2.append((layer_idx, specific_neurons_L2_layer))
-            # 発火頻度の保存（layer, neuronごと）
+            """ 発火頻度の保存（layer, neuronごと） """
+            # L2 only
             for neuron_idx in specific_neurons_L2_layer:
                 act_freq_L2_only[layer_idx][neuron_idx] += 1
             # 発火ニューロン数の保存（プロット時に平均算出のため）
