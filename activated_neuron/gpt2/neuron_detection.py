@@ -29,6 +29,8 @@ for L2, model_name in model_names.items():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
     # model = AutoModelForCausalLM.from_pretrained(model_name)
+    print(model)
+    sys.exit()
 
     """ tatoeba translation corpus """
     dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")

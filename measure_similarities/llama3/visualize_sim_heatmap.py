@@ -23,14 +23,19 @@ def nested_defaultdict():
 #     'mlp': defaultdict(nested_defaultdict),
 #     'layernorm': defaultdict(nested_defaultdict),
 # }
-param_changes_per_arc = {
-    'attention': {},
-    'mlp': {},
-    'layernorm': {},
-}
+# param_changes_per_arc = {
+#     'attention': {},
+#     'mlp': {},
+#     'layernorm': {},
+# }
 
 # get changes of weight per each langs <- only for abs changes of params(not for cos_sim and biases)
-def get_param_changes(weight_changes, langs: str, param_changes_per_arc: dict) -> dict:
+def get_param_changes(weight_changes, langs: str) -> dict:
+    param_changes_per_arc = {
+        'attention': {},
+        'mlp': {},
+        'layernorm': {},
+    }
     for k, v in weight_changes[langs].items():
         # 数字の部分を抽出
         layer_num = re.search(r'layers\.(\d+)\.', k)
@@ -74,7 +79,7 @@ def plot_heatmap(param_changes_per_arc, title="heatmap_gpt2", lang_pair="en_ja")
 
     # プロット
     plt.figure(figsize=(30, 15))
-    sns.heatmap(df, annot=True, fmt=".4f", cmap='Greens', vmin=0.0001, vmax=0.0030, cbar_kws={'label': 'changes of weights'})
+    sns.heatmap(df, annot=True, fmt=".4f", cmap='Greens', vmin=0.0001, vmax=0.0100, cbar_kws={'label': 'changes of weights'})
     plt.title(f'{title} {lang_pair}', fontsize=20, pad=15)
     plt.xlabel('param_names', fontsize=16, labelpad=15)
     plt.ylabel('layer_idx', fontsize=16, labelpad=15)
@@ -106,20 +111,20 @@ if __name__ == "__main__":
 
     """ llama3 """
     # en_ja
-    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ja', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ja')
     # print(param_changes_per_arc)
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ja")
 
     # en_ger
-    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ger', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ger')
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ger")
 
     # # en_ita
-    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ita', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ita')
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ita")
 
     # # en_ko
-    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ko', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_llama, 'en_ko')
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ko")
 
     print('visualization completed!')

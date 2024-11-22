@@ -1,7 +1,7 @@
 """ visualize magnitude of changes of params with heatmap """
 import os
 import sys
-sys.path.append("/home/s2410121/proj_LA/measure_similarities/gpt2/gpt2_measure_similarity.py")
+sys.path.append("/home/s2410121/proj_LA/measure_similarities/gpt2/")
 import re
 
 from collections import defaultdict
@@ -13,15 +13,21 @@ import seaborn as sns
 
 from gpt2_measure_similarity import *
 
-# Define architectures and layer indices
-param_changes_per_arc = {
-                            'attention': {},
-                            'mlp': {},
-                            'ln': {},
-                        }
+# # Define architectures and layer indices
+# param_changes_per_arc = {
+#                             'attention': {},
+#                             'mlp': {},
+#                             'ln': {},
+#                         }
 
 # get changes of weight per each langs <- only for abs changes of params(not for cos_sim and biases)
-def get_param_changes(weight_changes, langs: str, param_changes_per_arc: dict) -> dict:
+def get_param_changes(weight_changes, langs: str) -> dict:
+    # Define architectures and layer indices
+    param_changes_per_arc = {
+                                'attention': {},
+                                'mlp': {},
+                                'ln': {},
+                            }
     # print(weight_changes)
     for k, v in weight_changes[langs].items():
         # h.[].などの層のidx名を消す
@@ -66,35 +72,35 @@ def plot_heatmap(param_changes_per_arc, title="heatmap_gpt2", lang_pair="en_ja")
     plt.title(f'{title} {lang_pair}', fontsize=20, pad=15)
     plt.xlabel('param_names', fontsize=16, labelpad=15)
     plt.ylabel('layer_idx', fontsize=16, labelpad=15)
-    plt.savefig(f'/home/s2410121/proj_LA/measure_similarities/gpt2/images/heat_maps/{title}_{lang_pair}.png')
+    plt.savefig(f'/home/s2410121/proj_LA/measure_similarities/gpt-2/images/heat_maps/{title}_{lang_pair}.png')
     plt.close()
 
 
 if __name__ == "__main__":
     """ gpt2 """
     # en_ja
-    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ja', param_changes_per_arc)
-    # print(param_changes_per_arc)
-    plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ja")
+    # param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ja')
+    # # print(param_changes_per_arc)
+    # plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ja")
 
     # en_du
-    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_du', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_du')
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_du")
 
     # en_ger
-    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ger', param_changes_per_arc)
-    plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ger")
+    # param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ger')
+    # plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ger")
 
     # en_ita
-    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ita', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ita')
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ita")
 
     # en_fre
-    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_fre', param_changes_per_arc)
+    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_fre')
     plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_fre")
 
     # en_ko
-    param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ko', param_changes_per_arc)
-    plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ko")
+    # param_changes_per_arc = get_param_changes(weight_changes_gpt2, 'en_ko')
+    # plot_heatmap(param_changes_per_arc, "magnitude_changes_of_weights_", "en_ko")
 
     print('visualization completed!')

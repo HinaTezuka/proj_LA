@@ -28,15 +28,14 @@ GPT2Model(
 )
 """
 import sys
-sys.path.append('../')
+sys.path.append('/home/s2410121/proj_LA/measure_similarities')
 
 from similarity_funcs import *
 
 import torch
 
 from collections import defaultdict
-from transformers import AutoModel, GPT2Model
-
+from transformers import AutoModel, GPT2Model, AutoModelForCausalLM, GenerationConfig
 
 """ モデル指定・ロード """
 
@@ -44,8 +43,8 @@ from transformers import AutoModel, GPT2Model
 gpt2_model_original_name = "gpt2" # original gpt2(small) model : en
 gpt2_model_japanese_name = "rinna/japanese-gpt2-small" # ja
 gpt2_model_dutch_name = "GroNLP/gpt2-small-dutch" # du
-# gpt2_model_german_name = "dbmdz/german-gpt2" # ger
-gpt2_model_german_name = "ml6team/gpt2-small-german-finetune-oscar" # ger
+gpt2_model_german_name = "dbmdz/german-gpt2" # ger
+# gpt2_model_german_name = "ml6team/gpt2-small-german-finetune-oscar" # ger
 gpt2_model_italian_name = "GroNLP/gpt2-small-italian" # ita
 gpt2_model_french_name = "dbddv01/gpt2-french-small" # fre
 gpt2_model_korean_name = "skt/kogpt2-base-v2" # ko
