@@ -18,17 +18,53 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from neuron_intervention_funcs import evaluate_sentence_pair_with_edit_activation, get_complement, has_overlap
 
 """ load pkl_file(act_sum_dict) """
-# en_ja
 pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_ja_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
     act_sum_dict = pickle.load(f)
-print("unfolded pickle")
+print("unfolded pickle: act_sum_dict")
 
 # それぞれのneuronsの発火値の合計（dict)を取得
 act_sum_shared = act_sum_dict["shared"]
 act_sum_L1_or_L2 = act_sum_dict["L1_or_L2"]
 act_sum_L1_specific = act_sum_dict["L1_specific"]
 act_sum_L2_specific = act_sum_dict["L2_specific"]
+
+""" load pkl_file(act_freq_base_dict) <- 対訳ペアのみに対して発火しているshared neuronsをとるため """
+pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/base/act_freq/tatoeba_0_th/act_freq_dict_en_ja_tatoeba_0_th.pkl"
+with open(pkl_file_path, "rb") as f:
+    act_freq_base_dict = pickle.load(f)
+print("unfolded pickle: act_freq_base_dict")
+
+# shared neuronsのうち、非対訳ペアに対して発火したneuronsを取得 <- dict: {layer_idx: neuron_idx}
+freq_base_shared = act_freq_base_dict["shared_neurons"]
+
+"""
+shared neurons全体の集合から、非対訳ペアに対してよく発火しているshared neuronsを除去
+（対訳ペア:同じ意味表現に発火しているshared neuronsのみを抽出）
+"""
+# 非対訳ペア2000組のうち、(THRESHOLD)割以上発火しているshared neuronsを取得
+shared_neurons_non_translations = []  # list of tuples: [(layer_idx, neuron_idx)]
+THRESHOLD = 2000 * 0.5  # 5割以上
+
+# 非対訳ペアに該当するニューロンを収集
+for layer_idx, neurons in freq_base_shared.items():
+    for neuron_idx, act_freqency in neurons.items():
+        if act_freqency > THRESHOLD:
+            shared_neurons_non_translations.append((layer_idx, neuron_idx))
+
+# 削除対象のニューロンを記録
+keys_to_remove = []
+for layer_idx, neurons in act_sum_shared.items():
+    for neuron_idx in neurons.keys():  # 辞書に直接ループ
+        if (layer_idx, neuron_idx) in shared_neurons_non_translations:
+            keys_to_remove.append((layer_idx, neuron_idx))
+
+# 一括削除処理
+for layer_idx, neuron_idx in keys_to_remove:
+    del act_sum_shared[layer_idx][neuron_idx]
+    # サブ辞書が空の場合、親キーを削除
+    if not act_sum_shared[layer_idx]:
+        del act_sum_shared[layer_idx]
 
 """
 list [(layer_idx, neuron_idx, sum), (layer_idx, neuron_idx, sum_of_act_values), ...] <= ちゃんと取れているか確認用
@@ -45,7 +81,7 @@ listはact_sumを軸に降順にソート
 list[(layer_idx, neuron_idx), ...] <= 介入実験用
 listはact_sumを軸に降順にソート
 """
-layer_neuron_list = []
+layer_neuron_list = [] # shared neurons [(layer_idx, neuron_idx), ...]
 for layer_idx, neurons in act_sum_shared.items():
     for neuron_idx in neurons.keys():
         layer_neuron_list.append((layer_idx, neuron_idx))
@@ -88,7 +124,7 @@ for layer_idx, neurons in act_sum_L1_specific.items():
 layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda x: act_sum_L1_specific[x[0]][x[1]], reverse=True)
 
 """ どのくらい介入するか(n) """
-intervention_num = 15000
+intervention_num = 2000
 layer_neuron_list = layer_neuron_list[:intervention_num]
 complement_list = complement_list[:intervention_num]
 layer_neuron_list_L1_or_L2 = layer_neuron_list_L1_or_L2[:intervention_num]
@@ -155,14 +191,10 @@ def eval_blimp(model_names, layer_neuron_list):
             blimp = load_dataset("blimp", config)
             correct = 0
             total = 0
-            # c = 0
             for example in blimp["train"]:
                 sentence1 = example["sentence_good"]
                 sentence2 = example["sentence_bad"]
                 score1, score2 = evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_list, sentence1, sentence2)
-                # print(score1, score2)
-                # c += 1
-                # if c == 10: break
 
                 if score1 > score2:
                     correct += 1
@@ -180,51 +212,52 @@ def eval_blimp(model_names, layer_neuron_list):
 if __name__ == "__main__":
     result_main = eval_blimp(model_names, layer_neuron_list)
     print(f"result_main: {result_main}")
-    result_comp = eval_blimp(model_names, complement_list)
-    print(f"result_comp: {result_comp}")
-    result_comp_L1_or_L2 = eval_blimp(model_names, layer_neuron_list_L1_or_L2)
-    print(f"result_comp_L1_or_L2: {result_comp_L1_or_L2}")
-    result_comp_L1_specific = eval_blimp(model_names, layer_neuron_list_L1_specific)
-    print(f"result_comp_L1_specific: {result_comp_L1_specific}")
+    # result_comp = eval_blimp(model_names, complement_list)
+    # print(f"result_comp: {result_comp}")
+    # result_comp_L1_or_L2 = eval_blimp(model_names, layer_neuron_list_L1_or_L2)
+    # print(f"result_comp_L1_or_L2: {result_comp_L1_or_L2}")
+    # result_comp_L1_specific = eval_blimp(model_names, layer_neuron_list_L1_specific)
+    # print(f"result_comp_L1_specific: {result_comp_L1_specific}")
 
     # sys.exit()
 
     # データフレームに変換
     df_main = pd.DataFrame(result_main)
     print(df_main)
-    df_comp = pd.DataFrame(result_comp)
-    print(df_comp)
-    df_comp_L1_or_L2 = pd.DataFrame(result_comp_L1_or_L2)
-    print(df_comp_L1_or_L2)
-    df_comp_L1_specific = pd.DataFrame(result_comp_L1_specific)
-    print(df_comp_L1_specific)
+    # df_comp = pd.DataFrame(result_comp)
+    # print(df_comp)
+    # df_comp_L1_or_L2 = pd.DataFrame(result_comp_L1_or_L2)
+    # print(df_comp_L1_or_L2)
+    # df_comp_L1_specific = pd.DataFrame(result_comp_L1_specific)
+    # print(df_comp_L1_specific)
 
     # 各モデルごとに正答率の平均を計算
     overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
     print(overall_accuracy_main)
-    overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp)
-    overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp_L1_or_L2)
-    overall_accuracy_comp_L1_specific = df_comp_L1_specific.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp_L1_specific)
+    # overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
+    # print(overall_accuracy_comp)
+    # overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
+    # print(overall_accuracy_comp_L1_or_L2)
+    # overall_accuracy_comp_L1_specific = df_comp_L1_specific.groupby('Model')['Accuracy'].mean().reset_index()
+    # print(overall_accuracy_comp_L1_specific)
 
     # 列名を変更してOVERALLにします
     overall_accuracy_main.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp_L1_or_L2.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    # overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    # overall_accuracy_comp_L1_or_L2.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    # overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
 
     """ CSVに保存 """
     """ all layers """
     # shared_neurons intervention
-    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared.csv", index=False)
+    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared_ONLY.csv", index=False)
     # COMPLEMENT of shared_neurons intervention
-    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
-    # act_L1_or_L2 intervention
-    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
-    # L1_specific intervention
-    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
+    # df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
+    # # act_L1_or_L2 intervention
+    # df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
+    # # L1_specific intervention
+    # df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
+
     """ mid layers """
     # # shared_neurons intervention
     # df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/midlayers/n_{intervention_num}/llama3_en_ja_shared.csv", index=False)
@@ -236,5 +269,5 @@ if __name__ == "__main__":
     # df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/midlayers/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
 
     print(f"intervention num: {intervention_num}")
-    print(f"layer_range: {layer_range}")
+    # print(f"layer_range: {layer_range}")
     print("completed. saved to csv.")
