@@ -73,19 +73,21 @@ def plot_hist(dict1: defaultdict(float), dict2: defaultdict(float), L2: str) -> 
     plt.title('Cosine Similarities between translation pairs and non translation pairs')
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"/home/s2410121/proj_LA/measure_similarities/llama3/images/hidden_state_sim/llama3_hidden_state_sim_en_{L2}.png")
+    plt.savefig(f"/home/s2410121/proj_LA/measure_similarities/gpt-2/images/hidden_states_sim/gpt2_hidden_state_sim_en_{L2}.png")
     plt.close()
 
 if __name__ == "__main__":
     """ model configs """
-    # LLaMA-3
+    # GPT-2
     model_names = {
-        # "base": "meta-llama/Meta-Llama-3-8B",
-        "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
-        # "de": "DiscoResearch/Llama3-German-8B", # ger
-        "nl": "ReBatch/Llama-3-8B-dutch", # du
-        "it": "DeepMount00/Llama-3-8b-Ita", # ita
-        "ko": "beomi/Llama-3-KoEn-8B", # ko
+        # "base": "gpt2",
+        # "ja": "rinna/japanese-gpt2-small", # ja
+        # "de": "ml6team/gpt2-small-german-finetune-oscar", # ger
+        "nl": "GroNLP/gpt2-small-dutch", # du
+        "it": "GroNLP/gpt2-small-italian", # ita
+        "fr": "dbddv01/gpt2-french-small", # fre
+        "ko": "skt/kogpt2-base-v2", # ko
+        "es": "datificate/gpt2-small-spanish" # spa
     }
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -127,7 +129,7 @@ if __name__ == "__main__":
         results_non_same_semantics = calc_similarities_of_hidden_state_per_each_sentence_pair(model, tokenizer, random_data)
         final_results_same_semantics = defaultdict(float)
         final_results_non_same_semantics = defaultdict(float)
-        for layer_idx in range(33): # embedding層＋３２層
+        for layer_idx in range(13): # embedding層＋３２層
             final_results_same_semantics[layer_idx] = np.array(results_same_semantics[layer_idx]).mean()
             final_results_non_same_semantics[layer_idx] = np.array(results_non_same_semantics[layer_idx]).mean()
 
