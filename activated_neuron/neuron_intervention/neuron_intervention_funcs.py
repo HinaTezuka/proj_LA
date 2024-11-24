@@ -5,7 +5,7 @@ import torch
 import transformers
 
 from baukit import Trace, TraceDict
-from datasets import load_dataset
+from datasets import get_dataset_config_names, load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 """
@@ -102,3 +102,62 @@ def evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_l
     score2 /= (inputs2.input_ids.size(1) - 1)  # 平均を取る
 
     return score1, score2
+
+""" MLP内部のニューロン発火値を1回のみ変更し、その中で全てのBLiMPの項目を回す """
+def eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list, configs=get_dataset_config_names("blimp")):
+    # configs = ["npi_present_1"]
+    results = []
+
+    # 指定したニューロンの発火値を改竄した上で対数確率を計算
+    trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_neuron_list]
+    with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_neuron_list)) as tr:
+        for config in configs:
+            blimp = load_dataset("blimp", config)
+            correct = 0
+            total = 0
+            for example in blimp["train"]:
+                sentence1 = example["sentence_good"]
+                sentence2 = example["sentence_bad"]
+                inputs1 = tokenizer(sentence1, return_tensors="pt").to("cuda")
+                inputs2 = tokenizer(sentence2, return_tensors="pt").to("cuda")
+
+                # 発火値を改竄したモデルでlogitsを取得
+                with torch.no_grad():
+                    outputs1 = model(**inputs1)
+                    outputs2 = model(**inputs2)
+
+                # 文1の対数確率をトークンごとに取得して平均
+                log_probs1 = outputs1.logits.log_softmax(dim=-1)
+                score1 = 0.0
+                for i in range(inputs1.input_ids.size(1) - 1):
+                    target_token_id = inputs1.input_ids[0, i + 1]
+                    score1 += log_probs1[0, i, target_token_id].item()
+                score1 /= (inputs1.input_ids.size(1) - 1)  # 平均を取る
+
+                # 文2の対数確率をトークンごとに取得して平均
+                log_probs2 = outputs2.logits.log_softmax(dim=-1)
+                score2 = 0.0
+                for i in range(inputs2.input_ids.size(1) - 1):
+                    target_token_id = inputs2.input_ids[0, i + 1]
+                    score2 += log_probs2[0, i, target_token_id].item()
+                score2 /= (inputs2.input_ids.size(1) - 1)  # 平均を取る
+
+                if score1 > score2:
+                    correct += 1
+                total += 1
+
+            accuracy = correct / total
+            results.append({
+                "Model": model_name,
+                "Task": config,
+                "Accuracy": accuracy
+            })
+
+    return results
+
+def delete_overlaps(list1, list2):
+    """
+    list1から、list2と重複している要素を削除
+    """
+    set2 = set(list2)  # list2をsetに変換
+    return [item for item in list1 if item not in set2]
