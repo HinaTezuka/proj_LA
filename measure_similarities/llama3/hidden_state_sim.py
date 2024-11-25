@@ -134,6 +134,10 @@ if __name__ == "__main__":
         # print(final_results_same_semantics)
         # print(final_results_non_same_semantics)
 
+        # delete some cache
+        del model
+        torch.cuda.empty_cache()
+
         """ plot """
         plot_hist(final_results_same_semantics, final_results_non_same_semantics, L2)
 
