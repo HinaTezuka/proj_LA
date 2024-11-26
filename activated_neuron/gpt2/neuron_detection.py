@@ -28,13 +28,10 @@ L1 = "en" # L1 is fixed to english.
 for L2, model_name in model_names.items():
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
-    # model = AutoModelForCausalLM.from_pretrained(model_name)
-    print(model)
-    sys.exit()
 
     """ tatoeba translation corpus """
     dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")
-    # select first 100 sentences
+    # select first ? sentences
     num_sentences = 2000
     dataset = dataset.select(range(num_sentences))
     tatoeba_data = []
@@ -61,19 +58,11 @@ for L2, model_name in model_names.items():
 
     """ tracking neurons """
     neuron_detection_dict, neuron_detection_dict_vis, freq_dict, act_sum_dict = track_neurons_with_text_data(model, 'gpt2', tokenizer, tatoeba_data, 0, 0)
-    _, neuron_detection_base_dict_vis, _, _ = track_neurons_with_text_data(model, 'gpt2', tokenizer, random_data, 0, 0)
+    _, neuron_detection_base_dict_vis, freq_base_dict, _ = track_neurons_with_text_data(model, 'gpt2', tokenizer, random_data, 0, 0)
 
     # delete some cache
     del model
     torch.cuda.empty_cache()
-
-    """ main """
-    #
-    activated_neurons_L1 = neuron_detection_dict["activated_neurons_L1"]
-    activated_neurons_L2 = neuron_detection_dict["activated_neurons_L2"]
-    shared_neurons = neuron_detection_dict["shared_neurons"]
-    specific_neurons_L1 = neuron_detection_dict["specific_neurons_L1"]
-    specific_neurons_L2 = neuron_detection_dict["specific_neurons_L2"]
 
     # for visualization
     # 各文ペア、各層、各ニューロンの発火ニューロン数
@@ -83,8 +72,6 @@ for L2, model_name in model_names.items():
     specific_neurons_L1_vis = neuron_detection_dict_vis["specific_neurons_L1"]
     specific_neurons_L2_vis = neuron_detection_dict_vis["specific_neurons_L2"]
 
-    # shared_neuronsの各layer_idx, neuron_idxの発火値の合計 <- act_sum_shared_dictに保持
-
     """ for base line """
     # for visualization
     activated_neurons_L1_base_vis = neuron_detection_base_dict_vis["activated_neurons_L1"]
@@ -93,20 +80,7 @@ for L2, model_name in model_names.items():
     specific_neurons_L1_base_vis = neuron_detection_base_dict_vis["specific_neurons_L1"]
     specific_neurons_L2_base_vis = neuron_detection_base_dict_vis["specific_neurons_L2"]
 
-    """ 発火頻度dict """
-    # freq_L1 = freq_dict["activated_neurons_L1"]
-    # freq_L2 = freq_dict["activated_neurons_L2"]
-    # freq_shared = freq_dict["shared_neurons"]
-    # freq_L1_only = freq_dict["specific_neurons_L1"]
-    # freq_L2_only = freq_dict["specific_neurons_L2"]
-
-    """ 発火値の合計dict """
-    # sum_shared = act_sum_dict["shared"]
-    # sum_L1_or_L2 = act_sum_dict["L1_or_L2"]
-    # sum_L1_specific = act_sum_dict["L1_specific"]
-    # sum_L1_specific = act_sum_dict["L2_specific"]
-
-    """ (初回だけ)pickleでfileにshared_neurons(track_dict)を保存 """
+    """ save pickle(act_sum_dict) """
     pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/gpt2/pickles/tatoeba_0_th/act_sum_dict/act_sum_dict_en_{L2}_tatoeba_0_th.pkl"
     # directoryを作成（存在しない場合のみ)
     os.makedirs(os.path.dirname(pkl_file_path), exist_ok=True)
@@ -114,24 +88,35 @@ for L2, model_name in model_names.items():
         pickle.dump(act_sum_dict, f)
     print("pickle file saved.")
 
-    """ pickle file(shared_neurons)の解凍/読み込み """
-    with open(pkl_file_path, "rb") as f:
-        loaded_dict = pickle.load(f)
-    print("unfold pickle")
-    print(loaded_dict)
+    """ save pickle(act_freq_dict) """
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/gpt2/pickles/tatoeba_0_th/act_freq_dict/act_freq_dict_en_{L2}_tatoeba_0_th.pkl"
+    # directoryを作成（存在しない場合のみ)
+    os.makedirs(os.path.dirname(pkl_file_path), exist_ok=True)
+    with open(pkl_file_path, "wb") as f:
+        pickle.dump(freq_dict, f)
+    print("pickle file saved.")
+
+    """ save pickle(act_freq_base_dict) """
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/gpt2/pickles/tatoeba_0_th/act_freq_base_dict/act_freq_base_dict_en_{L2}_tatoeba_0_th.pkl"
+    # directoryを作成（存在しない場合のみ)
+    os.makedirs(os.path.dirname(pkl_file_path), exist_ok=True)
+    with open(pkl_file_path, "wb") as f:
+        pickle.dump(freq_base_dict, f)
+    print("pickle file saved.")
+
 
     """ visualization """
-    visualize_neurons_with_line_plot_mean(
-                                        L1,
-                                        L2,
-                                        # main
-                                        activated_neurons_L1_vis,
-                                        activated_neurons_L2_vis,
-                                        shared_neurons_vis,
-                                        specific_neurons_L1_vis,
-                                        specific_neurons_L2_vis,
-                                        "tatoeba_0_th",
-                                        # base line
-                                        shared_neurons_base_vis,
-                                    )
+    # visualize_neurons_with_line_plot_mean(
+    #                                     L1,
+    #                                     L2,
+    #                                     # main
+    #                                     activated_neurons_L1_vis,
+    #                                     activated_neurons_L2_vis,
+    #                                     shared_neurons_vis,
+    #                                     specific_neurons_L1_vis,
+    #                                     specific_neurons_L2_vis,
+    #                                     "tatoeba_0_th",
+    #                                     # base line
+    #                                     shared_neurons_base_vis,
+    #                                 )
 

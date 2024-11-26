@@ -87,7 +87,7 @@ def evaluate_sentence_pair_with_edit_activation(model, tokenizer, layer_neuron_l
     inputs2 = tokenizer(sentence2, return_tensors="pt").to("cuda")
 
     # 指定したニューロンの発火値を改竄した上で対数確率を計算
-    trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_neuron_list]
+    trace_layers = [f"transformer.h.{i}.mlp.act" for layer, _ in layer_neuron_list]
     with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_neuron_list)) as tr:
         # get logits
         with torch.no_grad():
@@ -117,7 +117,7 @@ def eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_l
     results = []
 
     # 指定したニューロンの発火値を改竄した上で対数確率を計算
-    trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_neuron_list]
+    trace_layers = [f"transformer.h.{i}.mlp.act" for layer, _ in layer_neuron_list]
     with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_neuron_list)) as tr:
         for config in configs:
             blimp = load_dataset("blimp", config)
@@ -167,7 +167,7 @@ def eval_JBLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_
     results = []
     predictions = defaultdict(lambda: defaultdict(int))
 
-    trace_layers = [f'model.layers.{layer}.mlp.act_fn' for layer, _ in layer_neuron_list]
+    trace_layers = [f"transformer.h.{i}.mlp.act" for layer, _ in layer_neuron_list]
     with TraceDict(model, trace_layers, edit_output=lambda output, layer: edit_activation(output, layer, layer_neuron_list)) as tr:
         for example in jblimp["train"]:
             task_name = example["phenomenon"]

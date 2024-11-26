@@ -143,7 +143,8 @@ layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda
 
 
 """ どのくらい介入するか(n) """
-intervention_num = count_shared_ONLY
+# intervention_num = count_shared_ONLY
+intervention_num = 5000
 shared_same_semantics = shared_same_semantics[:intervention_num]
 non_translation_shared = non_translation_shared[:intervention_num]
 complement_list = complement_list[:intervention_num]
@@ -212,15 +213,15 @@ if __name__ == "__main__":
     """ CSVに保存 """
     """ all layers """
     # shared_neurons intervention
-    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/all/llama3_en_ja_shared_ONLY.csv", index=False)
+    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared_ONLY.csv", index=False)
     # shared_neurons for non-translation pairs intervention
-    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/all/llama3_en_ja_shared_non_translation.csv", index=False)
+    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared_non_translation.csv", index=False)
     # COMPLEMENT of shared_neurons intervention
-    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/all/llama3_en_ja_COMP.csv", index=False)
+    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
     # act_L1_or_L2 intervention
-    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/all/llama3_en_ja_L1_or_L2.csv", index=False)
+    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
     # L1_specific intervention
-    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/all/llama3_en_ja_L1_specific.csv", index=False)
+    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
 
     print(f"intervention num: {intervention_num}")
     print(f"THRESHOLD: {THRESHOLD}")
