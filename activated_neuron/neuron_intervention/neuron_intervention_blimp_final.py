@@ -195,7 +195,7 @@ if __name__ == "__main__":
     overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
     print(overall_accuracy_main)
     overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_main)
+    print(overall_accuracy_shared_non_translation)
     overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
     print(overall_accuracy_comp)
     overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()

@@ -131,7 +131,7 @@ layer_neuron_list_L1_or_L2 = delete_overlaps(layer_neuron_list_L1_or_L2, shared_
 # sort
 layer_neuron_list_L1_or_L2 = sorted(layer_neuron_list_L1_or_L2, key=lambda x: act_sum_L1_or_L2[x[0]][x[1]], reverse=True)
 
-""" L1のみに発火しているニューロンの中から、layer_neuron_listを作成 """
+""" L2のみに発火しているニューロンの中から、layer_neuron_listを作成 """
 layer_neuron_list_L2_specific = []
 for layer_idx, neurons in act_sum_L2_specific.items():
     for neuron_idx in neurons.keys():
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
     print(overall_accuracy_main)
     overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_main)
+    print(overall_accuracy_shared_non_translation)
     overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
     print(overall_accuracy_comp)
     overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
