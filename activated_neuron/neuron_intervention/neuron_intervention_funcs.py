@@ -1,11 +1,10 @@
 import os
+import random
 import sys
-
 from collections import defaultdict
 
 import torch
 import transformers
-
 from baukit import Trace, TraceDict
 from datasets import get_dataset_config_names, load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -33,9 +32,11 @@ def get_complement(all_layers, all_neurons, original_list):
 
     # 補集合を計算
     complement_set = all_pairs - original_set
+    complement_list = list(complement_set)
+    random.shuffle(complement_list)  # リストの順序をランダムに変更
 
     # リストとして返す
-    return list(complement_set)
+    return complement_list
 
 """ かぶっている要素がないか（ちゃんと補集合が取れているか一応確認 """
 def has_overlap(list1, list2):

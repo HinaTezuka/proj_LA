@@ -3,17 +3,11 @@ import sys
 sys.path.append("/home/s2410121/proj_LA/activated_neuron")
 sys.path.append("/home/s2410121/proj_LA/activated_neuron/neuron_intervention")
 import dill as pickle
-
 from collections import defaultdict
 
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import transformers
-
-from baukit import Trace, TraceDict
-from datasets import get_dataset_config_names, load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from neuron_intervention_funcs import (
@@ -23,20 +17,21 @@ from neuron_intervention_funcs import (
     delete_overlaps,
 )
 
+L2 = "nl"
 """ load pkl_file(act_sum_dict) """
-pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_ja_tatoeba_0_th.pkl"
+pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_{L2}_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
     act_sum_dict = pickle.load(f)
 print("unfolded pickle: act_sum_dict")
 
 # それぞれのneuronsの発火値の合計（dict)を取得
-act_sum_shared_mix = act_sum_dict["shared"] # 非対訳ペアに発火しているshared neuronsも含む。
+act_sum_shared = act_sum_dict["shared"] # 非対訳ペアに発火しているshared neuronsも含む。
 act_sum_L1_or_L2 = act_sum_dict["L1_or_L2"]
 act_sum_L1_specific = act_sum_dict["L1_specific"]
 act_sum_L2_specific = act_sum_dict["L2_specific"]
 
-""" load pkl_file(act_freq_base_dict) <- 対訳ペアのみに対して発火しているshared neuronsをとるため """
-pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/base/act_freq/tatoeba_0_th/act_freq_dict_en_ja_tatoeba_0_th.pkl"
+""" load pkl_file(act_freq_base_dict): 非対訳ペアに発火している shared neruons <- 対訳ペアのみに対して発火しているshared neuronsをとるため """
+pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/base/act_freq/tatoeba_0_th/act_freq_dict_en_{L2}_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
     act_freq_base_dict = pickle.load(f)
 print("unfolded pickle: act_freq_base_dict")
@@ -51,7 +46,7 @@ shared neurons全体の集合から、非対訳ペアに対してよく発火し
 # 非対訳ペア2000組のうち、(THRESHOLD)割以上発火しているshared neuronsを取得
 # shared_neurons_non_translations = []  # list of tuples: [(layer_idx, neuron_idx)]
 THRESHOLD = 0
-# THRESHOLD_corpus = 2000 * THRESHOLD  # 1割以上
+# THRESHOLD_corpus = 2000 * THRESHOLD  #
 
 # # 非対訳ペアに該当するニューロンを収集
 # for layer_idx, neurons in freq_base_shared.items():
@@ -73,8 +68,8 @@ THRESHOLD = 0
 #     if not act_sum_shared[layer_idx]:
 #         del act_sum_shared[layer_idx]
 
-""" shared_neurons_ONLYをpickle fileとして保存 """
-# pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_same_semantics/shared_ONLY_dict_en_ja_tatoeba_0_th.pkl"
+""" shared_neurons_ONLYをpickle fileとして保存(初回のみ) """
+# pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_same_semantics/shared_ONLY_dict_en_{L2}_tatoeba_0_th.pkl"
 # # directoryを作成（存在しない場合のみ)
 # os.makedirs(os.path.dirname(pkl_file_path), exist_ok=True)
 # with open(pkl_file_path, "wb") as f:
@@ -82,10 +77,10 @@ THRESHOLD = 0
 # print("pickle file saved.")
 
 """ shared_ONLY_dictをロード（同じ意味表現にのみ発火しているshared neurons） """
-pkl_file_path = "/home/s2410121/proj_LA/activated_neuron/pickles/shared_ONLY/shared_ONLY_dict_en_ja_tatoeba_0_th.pkl"
+pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/shared_same_semantics/shared_ONLY_dict_en_{L2}_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
     act_sum_shared = pickle.load(f)
-print("unfolded pickle: act_freq_base_dict")
+print("unfolded pickle: act_same_semantics")
 
 count_shared_ONLY = 0
 for layer_idx in act_sum_shared.keys():
@@ -143,8 +138,8 @@ layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda
 
 
 """ どのくらい介入するか(n) """
-# intervention_num = count_shared_ONLY
-intervention_num = 5000
+intervention_num = count_shared_ONLY
+# intervention_num = 5000
 shared_same_semantics = shared_same_semantics[:intervention_num]
 non_translation_shared = non_translation_shared[:intervention_num]
 complement_list = complement_list[:intervention_num]
@@ -160,11 +155,11 @@ if __name__ == "__main__":
         # "base": "meta-llama/Meta-Llama-3-8B"
         "ja": "tokyotech-llm/Llama-3-Swallow-8B-v0.1", # ja
         # "de": "DiscoResearch/Llama3-German-8B", # ger
-        # "nl": "ReBatch/Llama-3-8B-dutch", # du
-        # "it": "DeepMount00/Llama-3-8b-Ita", # ita
-        # "ko": "beomi/Llama-3-KoEn-8B", # ko
+        "nl": "ReBatch/Llama-3-8B-dutch", # du
+        "it": "DeepMount00/Llama-3-8b-Ita", # ita
+        "ko": "beomi/Llama-3-KoEn-8B", # ko
     }
-    model_name = model_names["ja"]
+    model_name = model_names[L2]
     model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -212,18 +207,23 @@ if __name__ == "__main__":
 
     """ CSVに保存 """
     """ all layers """
-    # shared_neurons intervention
-    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared_ONLY.csv", index=False)
-    # shared_neurons for non-translation pairs intervention
-    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/n_{intervention_num}/llama3_en_ja_shared_non_translation.csv", index=False)
-    # COMPLEMENT of shared_neurons intervention
-    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/n_{intervention_num}/llama3_en_ja_COMP.csv", index=False)
-    # act_L1_or_L2 intervention
-    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/n_{intervention_num}/llama3_en_ja_L1_or_L2.csv", index=False)
-    # L1_specific intervention
-    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/n_{intervention_num}/llama3_en_ja_L1_specific.csv", index=False)
+    dir_path = "all"
+    # dir_path = f"n_{intervention_num}"
 
+    # shared_neurons intervention
+    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_ja_shared_ONLY.csv", index=False)
+    # shared_neurons for non-translation pairs intervention
+    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_ja_shared_non_translation.csv", index=False)
+    # COMPLEMENT of shared_neurons intervention
+    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/{dir_path}/llama3_en_ja_COMP.csv", index=False)
+    # act_L1_or_L2 intervention
+    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/{dir_path}/llama3_en_ja_L1_or_L2.csv", index=False)
+    # L1_specific intervention
+    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/{dir_path}/llama3_en_ja_L1_specific.csv", index=False)
+
+    print("============================ META INFO ============================")
+    print(f"L2: {L2}")
     print(f"intervention num: {intervention_num}")
     print(f"THRESHOLD: {THRESHOLD}")
-    print(f"count_shared_ONLY: {count_shared_ONLY}")
+    print(f"count_shared_ONLY(same semantics): {count_shared_ONLY}")
     print("completed. saved to csv.")
