@@ -42,6 +42,7 @@ configs = get_dataset_config_names("blimp")
 #     score2 = log_probs2[..., inputs2.input_ids[0]].mean()
 
 #     return score1, score2
+
 def evaluate_sentence_pair(model, tokenizer, sentence1, sentence2):
     inputs1 = tokenizer(sentence1, return_tensors="pt").to("cuda")
     inputs2 = tokenizer(sentence2, return_tensors="pt").to("cuda")

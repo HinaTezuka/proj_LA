@@ -53,6 +53,7 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
     act_freq_L1 = defaultdict(lambda: defaultdict(int))
     act_freq_L2 = defaultdict(lambda: defaultdict(int))
     act_freq_shared = defaultdict(lambda: defaultdict(int))
+    act_freq_L1_or_L2 = defaultdict(lambda: defaultdict(int))
     act_freq_L1_only = defaultdict(lambda: defaultdict(int))
     act_freq_L2_only = defaultdict(lambda: defaultdict(int))
 
@@ -146,6 +147,8 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
                 act_value_L2 = get_activation_value(mlp_activation_L2, layer_idx, neuron_idx, token_len_L2-1)
                 act_value = (act_value_L1 + act_value_L2) / 2
                 act_sum_L1_or_L2[layer_idx][neuron_idx] += act_value
+                """ 発火頻度の保存(L1 or L2) """
+                act_freq_L1_or_L2[layer_idx][neuron_idx] += 1
 
             # Specific neurons
             specific_neurons_L1_layer = np.intersect1d(activated_neurons_L1_layer[:, 2], non_activated_neurons_L2_layer[:, 2])
@@ -200,6 +203,7 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         "activated_neurons_L1": act_freq_L1,
         "activated_neurons_L2": act_freq_L2,
         "shared_neurons": act_freq_shared,
+        "activated_neurons_L1_or_L2": act_freq_L1_or_L2,
         "specific_neurons_L1": act_freq_L1_only,
         "specific_neurons_L2": act_freq_L2_only,
     }
