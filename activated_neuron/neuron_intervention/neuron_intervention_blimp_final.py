@@ -85,7 +85,6 @@ print("unfolded pickle: act_same_semantics")
 count_shared_ONLY = 0
 for layer_idx in act_sum_shared.keys():
     count_shared_ONLY += len(act_sum_shared[layer_idx])
-print(count_shared_ONLY)
 
 """
 list[(layer_idx, neuron_idx), ...] <= 介入実験用
@@ -211,19 +210,20 @@ if __name__ == "__main__":
     # dir_path = f"n_{intervention_num}"
 
     # shared_neurons intervention
-    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_ja_shared_ONLY.csv", index=False)
+    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_ONLY.csv", index=False)
     # shared_neurons for non-translation pairs intervention
-    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_ja_shared_non_translation.csv", index=False)
+    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_non_translation.csv", index=False)
     # COMPLEMENT of shared_neurons intervention
-    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/{dir_path}/llama3_en_ja_COMP.csv", index=False)
+    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/{dir_path}/llama3_en_{L2}_COMP.csv", index=False)
     # act_L1_or_L2 intervention
-    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/{dir_path}/llama3_en_ja_L1_or_L2.csv", index=False)
+    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/{dir_path}/llama3_en_{L2}_L1_or_L2.csv", index=False)
     # L1_specific intervention
-    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/{dir_path}/llama3_en_ja_L1_specific.csv", index=False)
+    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/{dir_path}/llama3_en_{L2}_L1_specific.csv", index=False)
 
     print("============================ META INFO ============================")
     print(f"L2: {L2}")
     print(f"intervention num: {intervention_num}")
+    print(f"intervention_num percentage: {float(intervention_num / count_shared_ONLY)} %.")
     print(f"THRESHOLD: {THRESHOLD}")
     print(f"count_shared_ONLY(same semantics): {count_shared_ONLY}")
     print("completed. saved to csv.")
