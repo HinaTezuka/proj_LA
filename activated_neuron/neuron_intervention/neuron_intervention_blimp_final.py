@@ -17,7 +17,7 @@ from neuron_intervention_funcs import (
     delete_overlaps,
 )
 
-L2 = "nl"
+L2 = "it"
 """ load pkl_file(act_sum_dict) """
 pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_{L2}_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
