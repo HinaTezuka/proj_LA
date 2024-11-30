@@ -17,7 +17,7 @@ from neuron_intervention_funcs import (
     delete_overlaps,
 )
 
-L2 = "it"
+L2 = "ja"
 """ load pkl_file(act_sum_dict) """
 pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/pickles/act_sum/tatoeba_0_th/act_sum_dict/act_sum_dict_en_{L2}_tatoeba_0_th.pkl"
 with open(pkl_file_path, "rb") as f:
@@ -137,8 +137,8 @@ layer_neuron_list_L1_specific = sorted(layer_neuron_list_L1_specific, key=lambda
 
 
 """ どのくらい介入するか(n) """
-intervention_num = count_shared_ONLY
-# intervention_num = 5000
+# intervention_num = count_shared_ONLY
+intervention_num = 20000
 shared_same_semantics = shared_same_semantics[:intervention_num]
 non_translation_shared = non_translation_shared[:intervention_num]
 complement_list = complement_list[:intervention_num]
@@ -206,8 +206,8 @@ if __name__ == "__main__":
 
     """ CSVに保存 """
     """ all layers """
-    dir_path = "all"
-    # dir_path = f"n_{intervention_num}"
+    # dir_path = "all"
+    dir_path = f"n_{intervention_num}"
 
     # shared_neurons intervention
     df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_ONLY.csv", index=False)
