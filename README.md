@@ -1,2 +1,2 @@
-# proj_LA
-RebelsNLU project for language acquisition of LMs
+# Second Language Acquisition of LMs
+
