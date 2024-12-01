@@ -162,63 +162,58 @@ if __name__ == "__main__":
     model = AutoModelForCausalLM.from_pretrained(model_name).to("cuda")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    result_main = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, shared_same_semantics)
-    print(f"result_main: {result_main}")
-    result_shared_non_translation = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, non_translation_shared)
-    print(f"result_shared_non_translation: {result_shared_non_translation}")
-    result_comp = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, complement_list)
-    print(f"result_comp: {result_comp}")
-    result_comp_L1_or_L2 = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list_L1_or_L2)
-    print(f"result_comp_L1_or_L2: {result_comp_L1_or_L2}")
-    result_comp_L1_specific = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list_L1_specific)
-    print(f"result_comp_L1_specific: {result_comp_L1_specific}")
-
-    # データフレームに変換
-    df_main = pd.DataFrame(result_main)
-    print(df_main)
-    df_shared_non_translation = pd.DataFrame(result_shared_non_translation)
-    print(df_shared_non_translation)
-    df_comp = pd.DataFrame(result_comp)
-    print(df_comp)
-    df_comp_L1_or_L2 = pd.DataFrame(result_comp_L1_or_L2)
-    print(df_comp_L1_or_L2)
-    df_comp_L1_specific = pd.DataFrame(result_comp_L1_specific)
-    print(df_comp_L1_specific)
-
-    # 各モデルごとに正答率の平均を計算
-    overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_main)
-    overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_shared_non_translation)
-    overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp)
-    overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp_L1_or_L2)
-    overall_accuracy_comp_L1_specific = df_comp_L1_specific.groupby('Model')['Accuracy'].mean().reset_index()
-    print(overall_accuracy_comp_L1_specific)
-
-    # 列名を変更してOVERALLに
-    overall_accuracy_main.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_shared_non_translation.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp_L1_or_L2.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-
-    """ CSVに保存 """
-    """ all layers """
+    # CSV保存用dir
     # dir_path = "all"
     dir_path = f"n_{intervention_num}"
 
-    # shared_neurons intervention
+    """ same semantics shared neurons """
+    result_main = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, shared_same_semantics)
+    print(f"result_main: {result_main}")
+    df_main = pd.DataFrame(result_main)
+    # calc overall
+    overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
+    overall_accuracy_main.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    # save as csv
     df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_ONLY.csv", index=False)
-    # shared_neurons for non-translation pairs intervention
+
+    """ non same semantics shared neurons """
+    result_shared_non_translation = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, non_translation_shared)
+    print(f"result_shared_non_translation: {result_shared_non_translation}")
+    df_shared_non_translation = pd.DataFrame(result_shared_non_translation)
+    overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
+    overall_accuracy_shared_non_translation.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_non_translation.csv", index=False)
-    # COMPLEMENT of shared_neurons intervention
+
+    """ normal COMP """
+    result_comp = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, complement_list)
+    print(f"result_comp: {result_comp}")
+    df_comp = pd.DataFrame(result_comp)
+    overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
+    overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/normal_COMP/{dir_path}/llama3_en_{L2}_COMP.csv", index=False)
-    # act_L1_or_L2 intervention
+
+    """ L1 or L2 """
+    result_comp_L1_or_L2 = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list_L1_or_L2)
+    print(f"result_comp_L1_or_L2: {result_comp_L1_or_L2}")
+    df_comp_L1_or_L2 = pd.DataFrame(result_comp_L1_or_L2)
+    overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
+    overall_accuracy_comp_L1_or_L2.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_or_L2/{dir_path}/llama3_en_{L2}_L1_or_L2.csv", index=False)
-    # L1_specific intervention
+
+    """ L1 Specific """
+    result_comp_L1_specific = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list_L1_specific)
+    print(f"result_comp_L1_specific: {result_comp_L1_specific}")
+    df_comp_L1_specific = pd.DataFrame(result_comp_L1_specific)
+    overall_accuracy_comp_L1_specific = df_comp_L1_specific.groupby('Model')['Accuracy'].mean().reset_index()
+    overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/L1_specific/{dir_path}/llama3_en_{L2}_L1_specific.csv", index=False)
+
+    """ print OVERALL """
+    print(f"overall_accuracy_main: {overall_accuracy_main}")
+    print(f"overall_accuracy_shared_non_translation: {overall_accuracy_shared_non_translation}")
+    print(f"overall_accuracy_comp: {overall_accuracy_comp}")
+    print(f"overall_accuracy_comp_L1_or_L2: {overall_accuracy_comp_L1_or_L2}")
+    print(f"overall_accuracy_comp_L1_specific: {overall_accuracy_comp_L1_specific}")
 
     print("============================ META INFO ============================")
     print(f"L2: {L2}")
