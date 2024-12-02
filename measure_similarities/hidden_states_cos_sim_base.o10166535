@@ -1,0 +1,8 @@
+visualization completed !
+
+=================================== RESOURCE INFORMATION ===================================
+ Requested Resource:
+ mem=256000000kb,walltime=168:00:00,ncpus=26,place=pack 
+ Used Resource: 
+ mem=19590060kb,walltime=00:42:06,ncpus=26,cpupercent=100,vmem=48662428kb
+============================================================================================

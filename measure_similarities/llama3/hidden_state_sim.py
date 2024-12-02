@@ -14,7 +14,7 @@ import torch
 
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 
 def calc_similarities_of_hidden_state_per_each_sentence_pair(model, tokenizer, data):
     """
@@ -38,13 +38,27 @@ def calc_similarities_of_hidden_state_per_each_sentence_pair(model, tokenizer, d
         last_token_index_L1 = inputs_L1["input_ids"].shape[1] - 1
         last_token_index_L2 = inputs_L2["input_ids"].shape[1] - 1
         # 各層の最後のトークンの hidden state をリストに格納
+        # last_token_hidden_states_L1 = [
+        #     layer_hidden_state[:, last_token_index_L1, :].detach().cpu().numpy() for layer_hidden_state in all_hidden_states_L1
+        # ]
+        # last_token_hidden_states_L2 = [
+        #     layer_hidden_state[:, last_token_index_L2, :].detach().cpu().numpy() for layer_hidden_state in all_hidden_states_L2
+        # ]
+        """各層の最後のトークンの hidden state をリストに格納 + 正規化 """
         last_token_hidden_states_L1 = [
-            layer_hidden_state[:, last_token_index_L1, :].detach().cpu().numpy() for layer_hidden_state in all_hidden_states_L1
+            (layer_hidden_state[:, last_token_index_L1, :].detach().cpu().numpy() /
+            np.linalg.norm(layer_hidden_state[:, last_token_index_L1, :].detach().cpu().numpy(), axis=-1, keepdims=True))
+            for layer_hidden_state in all_hidden_states_L1
         ]
         last_token_hidden_states_L2 = [
-            layer_hidden_state[:, last_token_index_L2, :].detach().cpu().numpy() for layer_hidden_state in all_hidden_states_L2
+            (layer_hidden_state[:, last_token_index_L2, :].detach().cpu().numpy() /
+            np.linalg.norm(layer_hidden_state[:, last_token_index_L2, :].detach().cpu().numpy(), axis=-1, keepdims=True))
+            for layer_hidden_state in all_hidden_states_L2
         ]
+        # cos_sim
         similarities = calc_cosine_sim(last_token_hidden_states_L1, last_token_hidden_states_L2, similarities)
+        # L2 distance
+        # similarities = calc_euclidean_distances(last_token_hidden_states_L1, last_token_hidden_states_L2, similarities)
 
     return similarities
 
@@ -54,6 +68,16 @@ def calc_cosine_sim(last_token_hidden_states_L1: list, last_token_hidden_states_
     """
     for layer_idx, (hidden_state_L1, hidden_state_L2) in enumerate(zip(last_token_hidden_states_L1, last_token_hidden_states_L2)):
         sim = cosine_similarity(hidden_state_L1, hidden_state_L2)[0, 0] # <- [[0.50695133]] のようになっているので、数値の部分だけ抽出
+        similarities[layer_idx].append(sim)
+
+    return similarities
+
+def calc_euclidean_distances(last_token_hidden_states_L1: list, last_token_hidden_states_L2: list, similarities: defaultdict(float)) -> defaultdict(float):
+    """
+    層ごとの類似度を計算
+    """
+    for layer_idx, (hidden_state_L1, hidden_state_L2) in enumerate(zip(last_token_hidden_states_L1, last_token_hidden_states_L2)):
+        sim = euclidean_distances(hidden_state_L1, hidden_state_L2)[0, 0] # <- [[0.50695133]] のようになっているので、数値の部分だけ抽出
         similarities[layer_idx].append(sim)
 
     return similarities
@@ -70,10 +94,28 @@ def plot_hist(dict1: defaultdict(float), dict2: defaultdict(float), L2: str) -> 
 
     plt.xlabel('Layer index')
     plt.ylabel('Cosine Similarity')
-    plt.title('Cosine Similarities between translation pairs and non translation pairs')
+    plt.title(f'en_{L2}')
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"/home/s2410121/proj_LA/measure_similarities/llama3/images/hidden_state_sim/llama3_hidden_state_sim_en_{L2}.png")
+    plt.savefig(f"/home/s2410121/proj_LA/measure_similarities/llama3/images/hidden_state_sim/normalized/llama3_hidden_state_sim_en_{L2}.png")
+    plt.close()
+
+def plot_hist_L2(dict1: defaultdict(float), dict2: defaultdict(float), L2: str) -> None:
+    # convert keys and values into list
+    keys = list(dict1.keys())
+    values1 = list(dict1.values())
+    values2 = list(dict2.values())
+
+    # plot hist
+    plt.bar(keys, values1, alpha=1, label='same semantics', zorder=2)
+    plt.bar(keys, values2, alpha=1, label='different semantics', zorder=1)
+
+    plt.xlabel('Layer index')
+    plt.ylabel('L2 distance')
+    plt.title('L2 distance between translation pairs and non translation pairs')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(f"/home/s2410121/proj_LA/measure_similarities/llama3/images/hidden_state_sim/L2_dist/llama3_hidden_state_sim_en_{L2}.png")
     plt.close()
 
 if __name__ == "__main__":
@@ -140,6 +182,7 @@ if __name__ == "__main__":
 
         """ plot """
         plot_hist(final_results_same_semantics, final_results_non_same_semantics, L2)
+        # plot_hist_L2(final_results_same_semantics, final_results_non_same_semantics, L2)
 
 
     print("visualization completed !")
