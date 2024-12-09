@@ -177,12 +177,12 @@ if __name__ == "__main__":
     # df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_ONLY.csv", index=False)
 
     """ non same semantics shared neurons """
-    result_shared_non_translation = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, non_translation_shared)
-    print(f"result_shared_non_translation: {result_shared_non_translation}")
-    df_shared_non_translation = pd.DataFrame(result_shared_non_translation)
-    overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
-    overall_accuracy_shared_non_translation.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_non_translation.csv", index=False)
+    # result_shared_non_translation = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, non_translation_shared)
+    # print(f"result_shared_non_translation: {result_shared_non_translation}")
+    # df_shared_non_translation = pd.DataFrame(result_shared_non_translation)
+    # overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
+    # overall_accuracy_shared_non_translation.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
+    # df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/neuron_intervention/csv_files/blimp/shared/{dir_path}/llama3_en_{L2}_shared_non_translation.csv", index=False)
 
     """ normal COMP """
     # result_comp = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, complement_list)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 
     """ print OVERALL and Meta Info"""
     # print(f"overall_accuracy_main: {overall_accuracy_main}")
-    print(f"overall_accuracy_shared_non_translation: {overall_accuracy_shared_non_translation}")
+    # print(f"overall_accuracy_shared_non_translation: {overall_accuracy_shared_non_translation}")
     # print(f"overall_accuracy_comp: {overall_accuracy_comp}")
     print(f"overall_accuracy_comp_L1_or_L2: {overall_accuracy_comp_L1_or_L2}")
     print(f"overall_accuracy_comp_L1_specific: {overall_accuracy_comp_L1_specific}")

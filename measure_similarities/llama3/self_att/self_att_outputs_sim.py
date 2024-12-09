@@ -40,7 +40,15 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig, 
 from datasets import load_dataset
 from sklearn.metrics.pairwise import cosine_similarity
 
+# device
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+def print_accessible_modules(model) -> None:
+  """
+  check accessible modules (for baukit).
+  """
+  for name, module in model.named_modules():
+    print(name)
 
 def get_out_llama3_self_att(model, prompt, device):
   model.eval() # swith the model to evaluation mode (deactivate dropout, batch normalization)
