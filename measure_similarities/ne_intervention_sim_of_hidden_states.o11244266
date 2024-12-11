@@ -1,0 +1,10 @@
+unfolded pickle: act_sum_dict
+unfolded pickle: act_freq_base_dict
+unfolded pickle: act_same_semantics
+
+=================================== RESOURCE INFORMATION ===================================
+ Requested Resource:
+ mem=256000000kb,walltime=168:00:00,ncpus=26,place=pack 
+ Used Resource: 
+ mem=32758776kb,walltime=01:28:22,ncpus=26,cpupercent=101,vmem=48892544kb
+============================================================================================
