@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
         """ tatoeba translation corpus """
         dataset = load_dataset("tatoeba", lang1=L1, lang2=L2, split="train")
-        num_sentences = 20
+        num_sentences = 2000
         dataset = dataset.select(range(num_sentences))
         tatoeba_data = []
         for item in dataset:
@@ -135,3 +135,7 @@ if __name__ == "__main__":
             final_results_same_semantics_a[layer_idx] = np.array(similarities_same_semantics_a[layer_idx]).mean()
             final_results_non_same_semantics_a[layer_idx] = np.array(similarities_non_same_semantics_a[layer_idx]).mean()
         plot_hist(final_results_same_semantics_a, final_results_non_same_semantics_a, L2, "non_same_semantics")
+
+        # delete some cache
+        del model
+        torch.cuda.empty_cache()
