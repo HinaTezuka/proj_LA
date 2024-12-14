@@ -77,7 +77,3 @@ def visualize_neurons_with_line_plot(
     # グラフの保存
     plt.savefig(f'//home/s2410121/proj_LA/activated_neuron/new_neurons/images/activations/{folder}/{L1}_{L2}.png')
     plt.close()
-
-if __name__ == "__main__":
-    # visualize_neurons_with_line_plot(L1, "ja")
-    print("visualization completed !")
