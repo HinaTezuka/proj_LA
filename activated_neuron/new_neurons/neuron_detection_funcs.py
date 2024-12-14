@@ -262,9 +262,6 @@ def track_neurons_with_text_data(model, model_name, tokenizer, data, active_THRE
         "L1_specific": act_sum_L1_specific,
         "L2_specific": act_sum_L2_specific,
     }
-    print(output_dict_vis)
-    print(output_dict_vis["shared_neurons"])
-    # sys.exit()
 
     return output_dict, output_dict_vis, freq_dict, act_sum_dict
 
@@ -273,7 +270,7 @@ def get_activation_value(activations, neuron_idx):
     get activation vlaue of neuron_idx.
     """
     # 指定された層、トークン、ニューロンの発火値を取得
-    activation_value = activations[0][neuron_idx].item()
+    activation_value = abs(activations[0][neuron_idx].item())
 
     return activation_value
 

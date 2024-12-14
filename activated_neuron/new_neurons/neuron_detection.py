@@ -87,22 +87,23 @@ for L2, model_name in model_names.items():
     freq dict: (2000対訳ペアを入れた時の） 各種ニューロンの発火頻度
     sum dict: 各種ニューロンの発火値の合計
     """
+    active_THRESHOLD = 0.01
     # 対訳ペア(freq_dict)
-    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/same_semantics/act_freq/0.01_th/en_{L2}.pkl"
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/same_semantics/act_freq/{active_THRESHOLD}_th/en_{L2}.pkl"
     save_as_pickle(pkl_file_path, freq_dict)
     print("pickle file saved: freq_dict.")
     # 対訳ペア(act_sum_dict)
-    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/same_semantics/act_sum/0.01_th/en_{L2}.pkl"
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/same_semantics/act_sum/{active_THRESHOLD}_th/en_{L2}.pkl"
     save_as_pickle(pkl_file_path, act_sum_dict)
     print("pickle file saved: act_sum_dict.")
     # 非対訳ペア(freq_base_dict)
-    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/non_same_semantics/act_freq/0.01_th/en_{L2}.pkl"
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/non_same_semantics/act_freq/{active_THRESHOLD}_th/en_{L2}.pkl"
     save_as_pickle(pkl_file_path, freq_base_dict)
     print("pickle file saved: freq_base_dict.")
     # 非対訳ペア(act_sum_base_dict)
-    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/non_same_semantics/act_sum/0.01_th/en_{L2}.pkl"
+    pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/non_same_semantics/act_sum/{active_THRESHOLD}_th/en_{L2}.pkl"
     save_as_pickle(pkl_file_path, act_sum_base_dict)
-    print("pickle file saved: freq_base_dict.")
+    print("pickle file saved: act_sum_base_dict.")
 
     """ pickle file(shared_neurons)の解凍/読み込み """
     # with open(pkl_file_path, "rb") as f:
@@ -110,7 +111,6 @@ for L2, model_name in model_names.items():
     # print("unfold pickle")
     # print(loaded_dict)
     # sys.exit()
-
 
     """ visualization """
     visualize_neurons_with_line_plot(
