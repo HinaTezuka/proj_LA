@@ -36,6 +36,13 @@ if __name__ == "__main__":
     active_THRESHOLD = 0.01
 
     for L2, model_name in model_names.items():
+
+        """ act_sum_dict(translation pair) """
+        pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/same_semantics/act_sum/{active_THRESHOLD}_th/en_{L2}.pkl"
+        act_sum_dict = unfreeze_pickle(pkl_file_path)
+        # それぞれのneuronsの発火値の合計（dict)を取得
+        act_sum_shared = act_sum_dict["shared"] # 現時点では非対訳ペアに発火しているshared neuronsとの重複も含む。
+
         """ shared_ONLY_dictをロード（同じ意味表現にのみ発火しているshared neurons） """
         pkl_file_path = f"/home/s2410121/proj_LA/activated_neuron/new_neurons/pickles/same_semantics_shared_ONLY/act_sum/{active_THRESHOLD}_th/en_{L2}.pkl"
         act_sum_shared = unfreeze_pickle(pkl_file_path)
@@ -43,7 +50,6 @@ if __name__ == "__main__":
         count_shared_ONLY = 0
         for layer_idx in act_sum_shared.keys():
             count_shared_ONLY += len(act_sum_shared[layer_idx])
-
         """
         list[(layer_idx, neuron_idx), ...] <= 介入実験用
         listはact_sumを軸に降順にソート
@@ -70,7 +76,7 @@ if __name__ == "__main__":
 
         """ どのくらい介入するか(n) """
         intervention_num = count_shared_ONLY
-        # intervention_num = 20000
+        # intervention_num = 5000
         shared_same_semantics = shared_same_semantics[:intervention_num]
         non_translation_shared = non_translation_shared[:intervention_num]
 
@@ -113,7 +119,7 @@ if __name__ == "__main__":
         for layer_idx in range(32): # ３２ layers
             final_results_same_semantics[layer_idx] = np.array(similarities_same_semantics[layer_idx]).mean()
             final_results_non_same_semantics[layer_idx] = np.array(similarities_non_same_semantics[layer_idx]).mean()
-        plot_hist(final_results_same_semantics, final_results_non_same_semantics, L2, "same_semantics")
+        plot_hist(final_results_same_semantics, final_results_non_same_semantics, L2, "same_semantics_including_overlap_non_same_semantics")
         # sys.exit()
         """ deactivate shared_neurons(non same semantics) """
         similarities_same_semantics = take_similarities_with_edit_activation(model, tokenizer, device, non_translation_shared, tatoeba_data)
@@ -128,3 +134,6 @@ if __name__ == "__main__":
         # delete some cache
         del model
         torch.cuda.empty_cache()
+
+if __name__ == "__main__":
+    print(intervention_num)

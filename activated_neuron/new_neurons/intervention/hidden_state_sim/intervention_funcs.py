@@ -97,7 +97,7 @@ def plot_hist(dict1: defaultdict(float), dict2: defaultdict(float), L2: str, fol
     plt.title(f'en_{L2}')
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/images/hidden_state_sim/intervention/llama3/{folder}/en_{L2}.png")
+    plt.savefig(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/images/hidden_state_sim/intervention/llama3/act_sum/{folder}/en_{L2}.png")
     plt.close()
 
 def save_as_pickle(file_path, target_dict) -> None:
