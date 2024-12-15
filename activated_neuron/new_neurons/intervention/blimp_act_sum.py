@@ -161,7 +161,7 @@ if __name__ == "__main__":
     overall_accuracy_main = df_main.groupby('Model')['Accuracy'].mean().reset_index()
     overall_accuracy_main.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
     # save as csv
-    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/blimp/{active_THRESHOLD}_th/shared_same_semantics/{dir_path}/en_{L2}.csv", index=False)
+    df_main.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/act_sum/blimp/{active_THRESHOLD}_th/shared_same_semantics/{dir_path}/en_{L2}.csv", index=False)
 
     """ non same semantics shared neurons """
     result_shared_non_translation = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, non_translation_shared)
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     df_shared_non_translation = pd.DataFrame(result_shared_non_translation)
     overall_accuracy_shared_non_translation = df_shared_non_translation.groupby('Model')['Accuracy'].mean().reset_index()
     overall_accuracy_shared_non_translation.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/blimp/{active_THRESHOLD}_th/shared_non_same_semantics/{dir_path}/en_{L2}.csv", index=False)
+    df_shared_non_translation.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/act_sum/blimp/{active_THRESHOLD}_th/shared_non_same_semantics/{dir_path}/en_{L2}.csv", index=False)
 
     """ normal COMP """
     result_comp = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, complement_list)
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     df_comp = pd.DataFrame(result_comp)
     overall_accuracy_comp = df_comp.groupby('Model')['Accuracy'].mean().reset_index()
     overall_accuracy_comp.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/blimp/{active_THRESHOLD}_th/normal_COMP/{dir_path}/en_{L2}.csv", index=False)
+    df_comp.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/act_sum/blimp/{active_THRESHOLD}_th/normal_COMP/{dir_path}/en_{L2}.csv", index=False)
 
     """ L1 or L2 """
     result_comp_L1_or_L2 = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list_L1_or_L2)
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     df_comp_L1_or_L2 = pd.DataFrame(result_comp_L1_or_L2)
     overall_accuracy_comp_L1_or_L2 = df_comp_L1_or_L2.groupby('Model')['Accuracy'].mean().reset_index()
     overall_accuracy_comp_L1_or_L2.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/blimp/{active_THRESHOLD}_th/L1_or_L2/{dir_path}/en_{L2}.csv", index=False)
+    df_comp_L1_or_L2.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/act_sum/blimp/{active_THRESHOLD}_th/L1_or_L2/{dir_path}/en_{L2}.csv", index=False)
 
     """ L1 Specific """
     result_comp_L1_specific = eval_BLiMP_with_edit_activation(model, model_name, tokenizer, layer_neuron_list_L1_specific)
@@ -193,10 +193,10 @@ if __name__ == "__main__":
     df_comp_L1_specific = pd.DataFrame(result_comp_L1_specific)
     overall_accuracy_comp_L1_specific = df_comp_L1_specific.groupby('Model')['Accuracy'].mean().reset_index()
     overall_accuracy_comp_L1_specific.rename(columns={'Accuracy': 'OVERALL'}, inplace=True)
-    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/blimp/{active_THRESHOLD}_th/L1_specific/{dir_path}/en_{L2}.csv", index=False)
+    df_comp_L1_specific.to_csv(f"/home/s2410121/proj_LA/activated_neuron/new_neurons/intervention/csv/llama3/act_sum/blimp/{active_THRESHOLD}_th/L1_specific/{dir_path}/en_{L2}.csv", index=False)
 
     """ print OVERALL and Meta Info"""
-    print(f"overall_accuracy_main: {overall_accuracy_main}")
+    print(f"overall_accuracy_shared_translation_pairs: {overall_accuracy_main}")
     print(f"overall_accuracy_shared_non_translation: {overall_accuracy_shared_non_translation}")
     print(f"overall_accuracy_comp: {overall_accuracy_comp}")
     print(f"overall_accuracy_comp_L1_or_L2: {overall_accuracy_comp_L1_or_L2}")
